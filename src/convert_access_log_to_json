@@ -136,7 +136,7 @@ public final class AccessLogToJsonConverter implements Runnable {
         public static LogEntry parse(String s) {
             Matcher matcher = LOG_ENTRY_PATTERN.matcher(s);
             if (!matcher.matches()) {
-                throw new IllegalStateException("Not a log entry"); // Improve message
+                throw new IllegalStateException("Not a log entry: " + s);
             }
             return new LogEntry(
                     matcher.group("clientIpAddress"),
@@ -154,6 +154,17 @@ public final class AccessLogToJsonConverter implements Runnable {
                     matcher.group("userAgent")
             );
         }
+    }
+
+    // Why can I not make this interface sealed?
+
+    public interface LogEntryConversionResult {
+    }
+
+    public record LogEntryJsonResult(String jsonString) implements LogEntryConversionResult {
+    }
+
+    public record LogEntryErrorResult(String message) implements LogEntryConversionResult {
     }
 
     public static void main(String... args) {
@@ -177,6 +188,7 @@ public final class AccessLogToJsonConverter implements Runnable {
         Stream<String> lineStream = stdInReader.lines();
 
         PrintWriter stdOutWriter = new PrintWriter(System.out, true, StandardCharsets.UTF_8);
+        PrintWriter stdErrWriter = new PrintWriter(System.err, true, StandardCharsets.UTF_8);
 
         stdOutWriter.print("["); // no newline at the end yet
 
@@ -184,18 +196,32 @@ public final class AccessLogToJsonConverter implements Runnable {
 
         lineStream
                 .map(this::convertLine)
-                .forEach(jsonStr -> writeLogEntryJson(jsonStr, stdOutWriter, isFirst));
+                .forEach(result -> writeLogEntryConversionResult(result, stdOutWriter, stdErrWriter, isFirst));
 
         stdOutWriter.println();
         stdOutWriter.println("]");
     }
 
-    // TODO Lines for which parsing fails should go to stderr
+    private LogEntryConversionResult convertLine(String line) {
+        try {
+            LogEntry logEntry = LogEntry.parse(line);
 
-    private String convertLine(String line) {
-        LogEntry logEntry = LogEntry.parse(line);
+            return new LogEntryJsonResult(logEntry.toJsonString());
+        } catch (RuntimeException e) {
+            return new LogEntryErrorResult(e.getMessage());
+        }
+    }
 
-        return logEntry.toJsonString();
+    private void writeLogEntryConversionResult(
+            LogEntryConversionResult result,
+            PrintWriter stdOutWriter,
+            PrintWriter stdErrWriter,
+            AtomicBoolean isFirst) {
+        if (result instanceof LogEntryJsonResult jsonResult) {
+            writeLogEntryJson(jsonResult.jsonString(), stdOutWriter, isFirst);
+        } else if (result instanceof LogEntryErrorResult errorResult) {
+            stdErrWriter.println(errorResult.message());
+        }
     }
 
     private void writeLogEntryJson(String logEntryJson, PrintWriter stdOutWriter, AtomicBoolean isFirst) {
