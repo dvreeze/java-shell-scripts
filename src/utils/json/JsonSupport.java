@@ -46,7 +46,7 @@ public class JsonSupport {
 
         JsonValueType getValueType();
 
-        // TODO Take control over charset and character mapping (using CharsetEncoder)
+        // TODO Consider taking control over malformed/unmappable character mapping (using CharsetEncoder)
 
         void print(PrintWriter pw, String indentString);
     }

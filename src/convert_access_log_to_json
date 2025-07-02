@@ -175,6 +175,9 @@ public final class AccessLogToJsonConverter implements Runnable {
         BufferedReader stdInReader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
         Stream<String> lineStream = stdInReader.lines();
 
+        // Running on Linux, the newline is the single-char Unix newline character
+        // So method println always outputs a Linux newline
+
         PrintWriter stdOutWriter = new PrintWriter(System.out, true, StandardCharsets.UTF_8);
         PrintWriter stdErrWriter = new PrintWriter(System.err, true, StandardCharsets.UTF_8);
 
@@ -259,7 +262,7 @@ public final class AccessLogToJsonConverter implements Runnable {
 
             JsonSupport.JsonValueType getValueType();
 
-            // TODO Take control over charset and character mapping (using CharsetEncoder)
+            // TODO Consider taking control over malformed/unmappable character mapping (using CharsetEncoder)
 
             void print(PrintWriter pw, String indentString);
         }
