@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -67,6 +68,24 @@ public final class AccessLogToJsonConverter implements Runnable {
                     ).stripTrailing()
             );
 
+    private static final String REQUEST_JSON_FORMAT_STRING =
+            """
+                    { "httpMethod": "%s", "url": "%s", "httpVersion": "%s" }""";
+
+    private static final String LOG_ENTRY_JSON_FORMAT_STRING =
+            """
+                    {
+                        "ipAddress": "%s",
+                        "clientIdentity": "%s",
+                        "userId": "%s",
+                        "requestDateTime": "%s",
+                        "request": %s,
+                        "httpStatusCode": "%s",
+                        "sizeOfResponse": %d,
+                        "referrer": "%s",
+                        "userAgent": "%s"
+                    }""";
+
     public enum HttpMethod {
         GET, POST, PUT, HEAD, DELETE, CONNECT, OPTIONS, TRACE, PATCH
     }
@@ -76,6 +95,15 @@ public final class AccessLogToJsonConverter implements Runnable {
             String url,
             String httpVersion
     ) {
+
+        public String toJsonString() {
+            return String.format(
+                    REQUEST_JSON_FORMAT_STRING,
+                    httpMethod(),
+                    escapeDoubleQuotes(url()),
+                    httpVersion()
+            );
+        }
     }
 
     public record LogEntry(
@@ -89,6 +117,21 @@ public final class AccessLogToJsonConverter implements Runnable {
             String referrer,
             String userAgent
     ) {
+
+        public String toJsonString() {
+            return String.format(
+                    LOG_ENTRY_JSON_FORMAT_STRING,
+                    ipAddress(),
+                    escapeDoubleQuotes(clientIdentity()),
+                    escapeDoubleQuotes(userId()),
+                    escapeDoubleQuotes(requestDateTime()),
+                    request.toJsonString(),
+                    httpStatusCode(),
+                    sizeOfResponse(),
+                    escapeDoubleQuotes(referrer()),
+                    escapeDoubleQuotes(userAgent())
+            );
+        }
 
         public static LogEntry parse(String s) {
             Matcher matcher = LOG_ENTRY_PATTERN.matcher(s);
@@ -135,9 +178,16 @@ public final class AccessLogToJsonConverter implements Runnable {
 
         PrintWriter stdOutWriter = new PrintWriter(System.out, true, StandardCharsets.UTF_8);
 
+        stdOutWriter.print("["); // no newline at the end yet
+
+        final AtomicBoolean isFirst = new AtomicBoolean(true); // not necessary, because processing is single-threaded
+
         lineStream
                 .map(this::convertLine)
-                .forEach(stdOutWriter::println);
+                .forEach(jsonStr -> writeLogEntryJson(jsonStr, stdOutWriter, isFirst));
+
+        stdOutWriter.println();
+        stdOutWriter.println("]");
     }
 
     // TODO Lines for which parsing fails should go to stderr
@@ -145,7 +195,21 @@ public final class AccessLogToJsonConverter implements Runnable {
     private String convertLine(String line) {
         LogEntry logEntry = LogEntry.parse(line);
 
-        // TODO Convert to JSON
-        return logEntry.toString();
+        return logEntry.toJsonString();
+    }
+
+    private void writeLogEntryJson(String logEntryJson, PrintWriter stdOutWriter, AtomicBoolean isFirst) {
+        if (isFirst.getAndSet(false)) {
+            stdOutWriter.println();
+        } else {
+            stdOutWriter.println(",");
+        }
+        stdOutWriter.print(logEntryJson); // no newline at the end yet
+    }
+
+    // See https://docs.ycrash.io/ycrash-features/ycrash-faq/escaping-special-characters.html
+
+    private static String escapeDoubleQuotes(String s) {
+        return s.replace("\"", "\\\"");
     }
 }
