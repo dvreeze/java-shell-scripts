@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -81,7 +82,7 @@ public final class AccessLogToJsonConverter implements Runnable {
                         "requestDateTime": "%s",
                         "request": %s,
                         "httpStatusCode": "%s",
-                        "sizeOfResponse": %d,
+                        "sizeOfResponse": %s,
                         "referrer": "%s",
                         "userAgent": "%s"
                     }""";
@@ -113,7 +114,7 @@ public final class AccessLogToJsonConverter implements Runnable {
             String requestDateTime,
             Request request,
             String httpStatusCode,
-            long sizeOfResponse,
+            Long sizeOfResponse,
             String referrer,
             String userAgent
     ) {
@@ -127,7 +128,7 @@ public final class AccessLogToJsonConverter implements Runnable {
                     escapeDoubleQuotes(requestDateTime()),
                     request.toJsonString(),
                     httpStatusCode(),
-                    sizeOfResponse(),
+                    Optional.ofNullable(sizeOfResponse()).map(Object::toString).orElse("null"),
                     escapeDoubleQuotes(referrer()),
                     escapeDoubleQuotes(userAgent())
             );
@@ -149,7 +150,7 @@ public final class AccessLogToJsonConverter implements Runnable {
                             matcher.group("httpVersion")
                     ),
                     matcher.group("httpStatus"),
-                    Long.parseLong(matcher.group("size")),
+                    parseLong(matcher.group("size")),
                     matcher.group("referrer"),
                     matcher.group("userAgent")
             );
@@ -237,5 +238,13 @@ public final class AccessLogToJsonConverter implements Runnable {
 
     private static String escapeDoubleQuotes(String s) {
         return s.replace("\"", "\\\"");
+    }
+
+    private static Long parseLong(String s) {
+        if (s.equals("-")) {
+            return null;
+        } else {
+            return Long.parseLong(s);
+        }
     }
 }
