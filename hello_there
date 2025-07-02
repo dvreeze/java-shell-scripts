@@ -1,0 +1,40 @@
+#!/bin/bash
+
+tput clear
+tput setaf 2
+tput cup 1 1; echo '+'
+tput cup 2 3; echo '+'
+tput cup 2 17; echo "User: $(tput setaf 7)${USER}"
+tput setaf 2
+tput cup 3 5; echo '+'
+tput cup 4 7; echo '+'
+tput cup 4 17; echo "Host name: $(tput setaf 7)$(hostname)"
+tput setaf 2
+tput cup 5 9; echo '+'
+tput cup 6 11; echo '+'
+tput cup 6 17; echo "Working directory:"
+tput cup 7 13; echo '+'
+tput cup 7 19; echo "$(tput setaf 7)${PWD}"
+tput setaf 2
+tput cup 8 15; echo '+'
+tput cup 9 17; echo '+'
+tput cup 10 19; echo '+'
+tput cup 11 21; echo '+'
+tput cup 12 19; echo '+'
+tput cup 13 17; echo '+'
+tput cup 14 15; echo '+'
+tput cup 15 13; echo '+'
+tput cup 16 11; echo '+'
+tput cup 16 17; echo "JAVA_HOME:"
+tput cup 17 9; echo '+'
+tput cup 17 19; echo "$(tput setaf 7)${JAVA_HOME}"
+tput setaf 2
+tput cup 18 7; echo '+'
+tput cup 18 17; echo "MAVEN_HOME:"
+tput cup 19 5; echo '+'
+tput cup 19 19; echo "$(tput setaf 7)${MAVEN_HOME}"
+tput setaf 2
+tput cup 20 3; echo '+'
+tput cup 21 1; echo '+'
+tput sgr0
+tput cup 23 0
