@@ -63,7 +63,7 @@ public final class AccessLogToJsonConverter implements Runnable {
                             """
                                     "(?<referrer>[^"]*)"\\s+""",
                             """
-                                    "(?<userAgent>[^"]*)"\s"""
+                                    "(?<userAgent>[^"]*)"\s""" // This trailing space is needed to please the compiler
                     ).stripTrailing()
             );
 
