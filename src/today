@@ -1,4 +1,4 @@
-#!/usr/bin/env -S java --source 17
+#!/usr/bin/env -S java --source 21
 
 /*
  * Copyright 2025-2025 Chris de Vreeze
@@ -42,6 +42,10 @@ public final class Today implements Runnable {
     @Override
     public void run() {
         Objects.requireNonNull(args); // Dummy statement to please the compiler
+
+        if (Runtime.version().feature() < 21) {
+            throw new IllegalStateException("Java version >= 21 required");
+        }
 
         System.out.println("Today is: " + LocalDate.now());
     }

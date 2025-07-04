@@ -1,4 +1,4 @@
-#!/usr/bin/env -S java --source 17
+#!/usr/bin/env -S java --source 21
 
 /*
  * Copyright 2025-2025 Chris de Vreeze
@@ -19,7 +19,6 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -49,13 +48,22 @@ public final class RightTrim implements Runnable {
 
         Objects.requireNonNull(args); // Dummy statement to please the compiler
 
-        BufferedReader stdInReader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
+        if (Runtime.version().feature() < 21) {
+            throw new IllegalStateException("Java version >= 21 required");
+        }
+
+        // Given Java feature version >= 21, the default charset is UTF-8 for InputStreamReader etc.
+        // See also https://www.baeldung.com/java-char-encoding.
+        // Given that stdIn expects UTF-8 input, use "iconv" to convert input to UTF-8 before running this program
+
+        BufferedReader stdInReader = new BufferedReader(new InputStreamReader(System.in));
         Stream<String> lineStream = stdInReader.lines();
 
         // Running on Linux, the newline is the single-char Unix newline character
         // So method println always outputs a Linux newline
+        // Consider using "unix2dos" on the output of the program for files that should have a "Windows newline"
 
-        PrintWriter stdOutWriter = new PrintWriter(System.out, true, StandardCharsets.UTF_8);
+        PrintWriter stdOutWriter = new PrintWriter(System.out, true);
 
         lineStream
                 .map(String::stripTrailing)
