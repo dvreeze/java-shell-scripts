@@ -1,6 +1,8 @@
 
 ### 3.2. User management in Linux
 
+For the overview page for part 3, see [Part 3. Linux, Core Concepts](./part-3-linux-core-concepts.md).
+
 This is about user management in Linux, not on a Mac.
 
 There are 3 kinds of users:

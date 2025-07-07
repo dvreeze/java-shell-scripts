@@ -1,6 +1,8 @@
 
 ### 3.1. Files on Unix, and the "everything is a file" concept
 
+For the overview page for part 3, see [Part 3. Linux, Core Concepts](./part-3-linux-core-concepts.md).
+
 A *file* is a container for storing, accessing and/or managing data. Typically a file has a unique identifier or
 *filename*. This name, in combination with its *path* provides a unique location of the file in the filesystem.
 
