@@ -7,8 +7,8 @@ from that course. The order of topics is almost exactly the same as the order of
 I use this documentation also as reference material. This summary leans very heavily on the slides of the mentioned course.
 Hence, all credits go to Jannis Seemann for offering his course and the accompanying slides.
 
-I highly recommend this Linux course to everyone who works with Linux. That would also include almost everyone
-working with Docker containers and/or Kubernetes.
+*I highly recommend the Linux course by Jannis Seemann to everyone who works with Linux*. That would also
+include almost everyone working with Docker containers and/or Kubernetes.
 
 The ultimate "bash reference document" is the [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/).
 
