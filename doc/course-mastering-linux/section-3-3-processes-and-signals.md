@@ -72,7 +72,8 @@ Then we could do things like: `renice -n 19 $(pgrep -f firefox)` (without double
 #### 3.3.1. Signals
 
 *Signals*  can be sent to processes, *interrupting* the process flow at a *convenient* time
-("convenient" does NOT mean that it will take long before interrupting the process flow).
+("convenient" does NOT mean that it will take long before interrupting the process flow;
+it does mean that the interruption does not take place at a time when it could potentially corrupt the OS).
 
 Signals *asynchronously notify a process of an event*. The OS is responsible for delivering the
 signal to the process. The OS maintains a *signal queue*, and it can even send a signal to a process
