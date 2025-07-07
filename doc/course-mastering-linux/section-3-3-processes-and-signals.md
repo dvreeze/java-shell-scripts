@@ -71,4 +71,54 @@ Then we could do things like: `renice -n 19 $(pgrep -f firefox)` (without double
 
 #### 3.3.1. Signals
 
+*Signals*  can be sent to processes, *interrupting* the process flow at a *convenient* time
+("convenient" does NOT mean that it will take long before interrupting the process flow).
+
+Signals *asynchronously notify a process of an event*. The OS is responsible for delivering the
+signal to the process. The OS maintains a *signal queue*, and it can even send a signal to a process
+that is not active at the moment.
+
+Some signals are:
+* `SIGKILL` ("kill process"; e.g. the kernel could send this signal)
+  * it forcefully terminates the program
+  * it is the *kernel* handling this signal and unique in that sense; the program is not even informed!
+  * obviously, this signal can lead to data loss; there is no cooperation from the program, after all
+  * `SIGILL` ("illegal instruction")
+* `SIGINT` ("interrupt"; usually sent from a terminal)
+  * it means: dear process, please try to come to an end, because we are in a shell and would like to regain control
+  * the program can ignore the signal
+* `SIGHUP` ("hangup"; sent from a shell)
+  * for usual programs, `SIGHUP` communicates that the terminal has been closed; then the program usually exits
+  * for *daemon processes* (background processes) it may signal that its configuration should be reloaded
+  * we could send this signal ourselves too: `kill -s SIGHUP 12345` (for process 12345)
+* `SIGWINCH` ("window change"; sent by a window manager)
+* `SIGTERM` ("terminate process"; sent from other processes)
+  * it means: dear process, please try to come to an end, if possible
+  * the program can ignore the signal
+* `SIGSTOP` and `SIGCONT`
+  * `SIGSTOP` puts the program in a stopped state, i.e. a "paused" state
+  * the program cannot ignore this signal; it cannot even catch it
+  * we can send the signal ourselves
+  * with `SIGCONT` the program can be resumed again
+  * these signals can be tested well with programs like `cmatrix` and `wget`
+
+If we end a program with CTRL-C in a shell, the `SIGINT` signal is sent to that program.
+It is sent from the terminal in order to regain control over the terminal. The program can
+listen to the signal and perform custom actions, including ignoring the signal!
+
+The command to *send signals* is called `kill`. Despite the name, the command can send any signal.
+Syntax (assuming the process to which the signal is sent is 12345, and the signal is `SIGINT`):
+* `kill -s SIGINT 12345`
+* or: `kill -SIGINT 12345`
+* or: `kill -s 2 12345` (`SIGINT` has number 2)
+* or: `kill -2 12345`
+
+Command `kill 12345` is identical to `kill -s SIGTERM 12345`, so `SIGTERM` is the default signal sent by
+that command.
+
+We can also select the process(es) by name, using the `killall` command (again, this command is for sending any signal):
+* `killall -s SIGINT firefox`
+* or: `killall -SIGINT firefox`
+
+Command `kill -l` outputs a list of signals with their numbers (e.g. 15 for `SIGTERM`, and 9 for `SIGKILL`).
 
