@@ -62,7 +62,6 @@ more time from the scheduler.
 Increasing niceness for a process requires no root privilege, but decreasing niceness does. Examples:
 * for a new process: `nice -n 19 gedit`
 * for a new process: `sudo nice -n -20 gedit`
-  * failing to use `sudo` causes only the "niceness" setting to fail, but not the following command itself
 * changing priority for an existing process (with PID 1234): `renice -n 10 1234`
 * changing priority for an existing process (with PID 1234): `sudo renice -n -10 1234`
 
