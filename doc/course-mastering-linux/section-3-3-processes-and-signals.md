@@ -83,7 +83,7 @@ Some signals are:
   * it forcefully terminates the program
   * it is the *kernel* handling this signal and unique in that sense; the program is not even informed!
   * obviously, this signal can lead to data loss; there is no cooperation from the program, after all
-  * `SIGILL` ("illegal instruction")
+* `SIGILL` ("illegal instruction")
 * `SIGINT` ("interrupt"; usually sent from a terminal)
   * it means: dear process, please try to come to an end, because we are in a shell and would like to regain control
   * the program can ignore the signal
