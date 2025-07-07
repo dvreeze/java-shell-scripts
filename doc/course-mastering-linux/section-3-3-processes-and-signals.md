@@ -85,7 +85,9 @@ Some signals are:
   * obviously, this signal can lead to data loss; there is no cooperation from the program, after all
 * `SIGILL` ("illegal instruction")
 * `SIGINT` ("interrupt"; usually sent from a terminal)
-  * it means: dear process, please try to come to an end, because we are in a shell and would like to regain control
+  * it means: dear process, please try to come to an end, because we are in a shell and would like to regain control over the terminal
+  * if we end a program with CTRL-C in a shell, the `SIGINT` signal is sent to that program
+  * we could send this signal ourselves too: `kill -s SIGINT 12345` (for process 12345)
   * the program can ignore the signal
 * `SIGHUP` ("hangup"; sent from a shell)
   * for usual programs, `SIGHUP` communicates that the terminal has been closed; then the program usually exits
@@ -101,10 +103,6 @@ Some signals are:
   * we can send the signal ourselves
   * with `SIGCONT` the program can be resumed again
   * these signals can be tested well with programs like `cmatrix` and `wget`
-
-If we end a program with CTRL-C in a shell, the `SIGINT` signal is sent to that program.
-It is sent from the terminal in order to regain control over the terminal. The program can
-listen to the signal and perform custom actions, including ignoring the signal!
 
 The command to *send signals* is called `kill`. Despite the name, the command can send any signal.
 Syntax (assuming the process to which the signal is sent is 12345, and the signal is `SIGINT`):
