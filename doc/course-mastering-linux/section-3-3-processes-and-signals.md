@@ -115,8 +115,56 @@ Command `kill 12345` is identical to `kill -s SIGTERM 12345`, so `SIGTERM` is th
 that command.
 
 We can also select the process(es) by name, using the `killall` command (again, this command is for sending any signal):
-* `killall -s SIGINT firefox`
-* or: `killall -SIGINT firefox`
+* e.g. `killall -s SIGTERM firefox`, or: `killall -SIGTERM firefox`, or: `killall firefox` (`SIGTERM` is the default signal)
+* this matches and sends the signal to all processes with "firefox" in the name, matching only the first 15 characters of the program name
+* for programs with very long names, use `killall -e` (for "exact")
+* interactive mode: `killall -i firefox`
 
 Command `kill -l` outputs a list of signals with their numbers (e.g. 15 for `SIGTERM`, and 9 for `SIGKILL`).
 
+Many commands, such as `kill`, exist twice:
+* once as *shell built-in*
+  * command `type kill` says: "kill is a shell builtin" (on my machine)
+* once as *executable file*, typically under `/usr/bin`
+  * command `which kill` returns path `/usr/bin/kill` to the executable file (on my machine)
+  * in the `zsh` shell, use command `where kill` instead of `which kill`
+  * command `cat` is not a shell built-in; `type cat` and `which cat` both point to the `/usr/bin/cat` executable
+
+Note the different output of `kill -l` and `usr/bin/kill -l`, so they are indeed quite different.
+
+When a process exits:
+1. most of the resources of the process are made available again to other processes
+2. the kernel sends a `SIGCHLD` signal to notify the parent of the terminated child process
+3. the parent "reaps" the terminated child process; i.e. it collects the child's *exit status* through a system call (`wait()` or `waitpid()`)
+
+The last terminated child's exit code can be queried with `$?`.
+
+Of course, it is possible that the parent terminates before the child. In that case, the child
+becomes an *orphan*, and is adopted by the `init` process (or a child of the `init` process).
+
+A *zombie process* is a terminated process that still has an entry in the *process table*.
+Usually this occurs when the parent has not (yet) read the child's exit status.
+
+Zombies are marked as "Z" in the output of `ps -l`. If there are too many of them, this may lead
+to process table overflow.
+
+Removal of zombie processes:
+* when the parent process ends, they are usually removed automatically
+* if not, sending a `SIGCHLD` signal to the parent hopefully helps
+* if we kill the parent process, the `init` process will adopt the zombie process and reap it
+
+*Process states*:
+* *Running* (*R*): this means what it says, namely "currently running"
+* *Sleeping (interruptible)* (*S*): it is waiting for some event, and on receipt of that event returns a signal (about receipt of the event)
+* *Uninterruptible sleep* (*D*): typically during a *system call* (usually I/O)
+* *Traced or stopped* (*T*): "stopped" means "temporarily stopped" or "paused"
+* *Zombie* (*Z*): see above
+
+Process state changes:
+* From *R* to *S*: waiting for some event
+* From *S* to *R*: event ready, or signal received
+* From *R* to *D*: invoking a system call
+* From *D* to *R*: system call finished
+* From *R* to *T*: `SIGSTOP` (see above), `SIGTSTP` (typically CTRL-Z from a terminal), `ptrace()` system call
+* From *T* to *R*: `SIGCONT` (see above)
+* From *R* to *Z*: `exit()` call (see above)
