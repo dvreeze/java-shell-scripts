@@ -31,10 +31,10 @@ The `ps` command in POSIX mode, where many options can be *combined*:
 * `ps` (without any arguments) shows all processes of the current terminal (TTY, see `tty` command)
 * `ps -A` or `ps -e` shows all processes, from all users and all sessions (with or without terminal)
 * `ps -f` shows extended information, such as user, terminal and PPID
-  * so `ps -e -f` or ```ps -ef` shows all processes, showing extended information in the output
+  * so `ps -e -f` or `ps -ef` shows all processes, showing extended information in the output
 * `ps -l` shows processes in a longer format, adding a few more columns, compared to option `-f`
 * `ps --forest` shows processes as an ASCII tree
-  * `ps -ef --forest` is like `ps -ef`, yet additionally making clear where they occur in the process hierarchy
+  * `ps -ef --forest` is like `ps -ef`, yet additionally making clear where each process occurs in the process hierarchy
   * knowing a process ID (say 1234), `ps -ef --forest | grep 1234` filters on that PID or PPID
 * `ps -p 1234,1235` (or even `ps 1234 1235`) shows processes with the given PIDs
 
