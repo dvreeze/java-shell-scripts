@@ -72,6 +72,7 @@ Some basic text file management commands are:
 * `head`
     * `head -n 20 data.txt`
 * `tail` (similar to `head`, but at the end of the text file rather than the beginning)
+    * to "follow the tail" of a file at realtime, do a `tail -f some-log-file.log`
 * `less`
     * TODO
 * `wc` (word count)

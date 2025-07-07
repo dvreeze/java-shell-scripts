@@ -62,9 +62,14 @@ more time from the scheduler.
 Increasing niceness for a process requires no root privilege, but decreasing niceness does. Examples:
 * for a new process: `nice -n 19 gedit`
 * for a new process: `sudo nice -n -20 gedit`
+  * failing to use `sudo` causes only the "niceness" setting to fail, but not the following command itself
 * changing priority for an existing process (with PID 1234): `renice -n 10 1234`
 * changing priority for an existing process (with PID 1234): `sudo renice -n -10 1234`
 
 If we just want to get a PID, based on process name, `ps -ef --forest | grep -F 'firefox'` is not that handy.
 Instead, we could just do `pgrep firefox`. To get child processes as well, do `pgrep -f firefox`.
-Then we could do things like: `renice -n 19 $(pgrep firefox)` (without double-quote pairs).
+Then we could do things like: `renice -n 19 $(pgrep -f firefox)` (without double-quote pairs).
+
+#### 3.3.1. Signals
+
+
