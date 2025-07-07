@@ -175,7 +175,7 @@ parameters of the `top` command are:
 * `-u user-name` (show only processes owned by the given user)
 * `-d 3` (setting the delay between display updates, in seconds; the default is 3 seconds)
 * `-i` (hide "idle" processes, so showing only processes currently using CPU resources)
-* `-c` (display the full command line uses to start each process, instead of just the command name)
+* `-c` (display the full command line used to start each process, instead of just the command name)
 
 The output of `top` can be changed interactively:
 * the "f key" is used to further customize the output
