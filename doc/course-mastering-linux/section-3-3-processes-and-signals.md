@@ -169,3 +169,20 @@ Process state changes:
 * From *R* to *T*: `SIGSTOP` (see above), `SIGTSTP` (typically CTRL-Z from a terminal), `ptrace()` system call
 * From *T* to *R*: `SIGCONT` (see above)
 * From *R* to *Z*: `exit()` call (see above)
+
+To display all processes in our system, we can use `top` (`top` or `sudo top`). The most important
+parameters of the `top` command are:
+* `-u user-name` (show only processes owned by the given user)
+* `-d 3` (setting the delay between display updates, in seconds; the default is 3 seconds)
+* `-i` (hide "idle" processes, so showing only processes currently using CPU resources)
+* `-c` (display the full command line uses to start each process, instead of just the command name)
+
+The output of `top` can be changed interactively:
+* the "f key" is used to further customize the output
+* with the "k key" ("kill") we can send signals to processes
+* with the "r key" we can change the niceness of processes
+* with the "z key" we can change to color mode, and with the "Z key" (uppercase) we can configure it
+* with the "W key" (uppercase) we can save the current configuration, so it is used the next time `top` is started
+
+An easier alternative to `top` is `htop`, but typically it must be installed. Compared to `top`
+it is quite self-explanatory.
