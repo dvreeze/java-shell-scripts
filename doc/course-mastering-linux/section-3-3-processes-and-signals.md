@@ -19,6 +19,8 @@ A *process* is an *instance of a program*. Some characteristics of a process are
 
 The course material (in this section) does not really talk about *threads*, but they are a property too.
 A well-known example of a process (to Java developers) is a *running Java program* (JVM).
+In a running Java program, a *kernel thread* is represented in Java as a *platform thread*
+(as an instance of class `java.lang.Thread` for which method `isVirtual()` returns `false`).
 
 We can query for information about running processes with the `ps` command ("process status").
 Here the Linux `ps` command is described (not the same command on macOS). It can be used in *POSIX mode*
