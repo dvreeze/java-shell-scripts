@@ -151,7 +151,7 @@ to process table overflow.
 
 Removal of zombie processes:
 * when the parent process ends, they are usually removed automatically
-* if not, sending a `SIGCHLD` signal to the parent hopefully helps
+* otherwise, sending a `SIGCHLD` signal to the parent hopefully helps
 * if we kill the parent process, the `init` process will adopt the zombie process and reap it
 
 *Process states*:
