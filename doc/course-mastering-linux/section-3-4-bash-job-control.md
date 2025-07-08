@@ -47,7 +47,7 @@ is brought back to the foreground.
 
 *Resuming* a suspended job:
 * resuming in the foreground: `fg %job-id`
-* resuming in the background: `fg %job-id &` or `bg %job-id`
+* resuming in the background: `bg %job-id`
 * when continuing, a `SIGCONT` signal is sent to the program (in that sense similar to `SIGCONT` after `SIGSTOP`)
 
 Killing a job is analogous to killing a process:
