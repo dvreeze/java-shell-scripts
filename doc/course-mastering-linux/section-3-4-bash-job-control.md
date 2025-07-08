@@ -35,8 +35,8 @@ A *background job*:
 Background jobs can be found with command `jobs`. The result is a list of job IDs.
 
 A background job can be turned into a foreground job by command `fg %some-job-id`.
-Note the `%` sign, which is used to refer to jobs, as opposed to processes
-With command `fg` without arguments the current job (marked with a plus sign in the "jobs table")
+Note the `%` sign, which is used to refer to jobs, as opposed to processes.
+When using command `fg` without arguments, the current job (marked with a plus sign in the "jobs table")
 is brought back to the foreground.
 
 *Suspending* jobs:
