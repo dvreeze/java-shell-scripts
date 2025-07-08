@@ -141,19 +141,21 @@ public final class PsWannabe implements Runnable {
 
                 List<Map.Entry<String, JsonSupport.JsonValue>> entries = List.copyOf(fields.entrySet());
 
-                if (!entries.isEmpty()) {
+                if (entries.isEmpty()) {
+                    pw.println();
+                } else {
                     for (Map.Entry<String, JsonSupport.JsonValue> entry : entries.subList(0, entries.size() - 1)) {
                         pw.print(newIndentString);
                         pw.printf("\"%s\": ", entry.getKey());
                         entry.getValue().print(pw, newIndentString);
                         pw.println(",");
                     }
+                    Map.Entry<String, JsonSupport.JsonValue> lastEntry = entries.getLast();
+                    pw.print(newIndentString);
+                    pw.printf("\"%s\": ", lastEntry.getKey());
+                    lastEntry.getValue().print(pw, newIndentString);
+                    pw.println();
                 }
-                Map.Entry<String, JsonSupport.JsonValue> lastEntry = entries.get(entries.size() - 1);
-                pw.print(newIndentString);
-                pw.printf("\"%s\": ", lastEntry.getKey());
-                lastEntry.getValue().print(pw, newIndentString);
-                pw.println();
 
                 pw.print(indentString);
                 pw.print("}");
@@ -191,17 +193,19 @@ public final class PsWannabe implements Runnable {
 
                 String newIndentString = indentString + "    ";
 
-                if (!elements.isEmpty()) {
+                if (elements.isEmpty()) {
+                    pw.println();
+                } else {
                     for (JsonSupport.JsonValue element : elements.subList(0, elements.size() - 1)) {
                         pw.print(newIndentString);
                         element.print(pw, newIndentString);
                         pw.println(",");
                     }
+                    JsonSupport.JsonValue lastElement = elements.getLast();
+                    pw.print(newIndentString);
+                    lastElement.print(pw, newIndentString);
+                    pw.println();
                 }
-                JsonSupport.JsonValue lastElement = elements.get(elements.size() - 1);
-                pw.print(newIndentString);
-                lastElement.print(pw, newIndentString);
-                pw.println();
 
                 pw.print(indentString);
                 pw.print("]");

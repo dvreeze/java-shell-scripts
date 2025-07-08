@@ -73,19 +73,21 @@ public class JsonSupport {
 
             List<Map.Entry<String, JsonValue>> entries = List.copyOf(fields.entrySet());
 
-            if (!entries.isEmpty()) {
+            if (entries.isEmpty()) {
+                pw.println();
+            } else {
                 for (Map.Entry<String, JsonValue> entry : entries.subList(0, entries.size() - 1)) {
                     pw.print(newIndentString);
                     pw.printf("\"%s\": ", entry.getKey());
                     entry.getValue().print(pw, newIndentString);
                     pw.println(",");
                 }
+                Map.Entry<String, JsonValue> lastEntry = entries.getLast();
+                pw.print(newIndentString);
+                pw.printf("\"%s\": ", lastEntry.getKey());
+                lastEntry.getValue().print(pw, newIndentString);
+                pw.println();
             }
-            Map.Entry<String, JsonValue> lastEntry = entries.get(entries.size() - 1);
-            pw.print(newIndentString);
-            pw.printf("\"%s\": ", lastEntry.getKey());
-            lastEntry.getValue().print(pw, newIndentString);
-            pw.println();
 
             pw.print(indentString);
             pw.print("}");
@@ -122,17 +124,19 @@ public class JsonSupport {
 
             String newIndentString = indentString + "    ";
 
-            if (!elements.isEmpty()) {
+            if (elements.isEmpty()) {
+                pw.println();
+            } else {
                 for (JsonValue element : elements.subList(0, elements.size() - 1)) {
                     pw.print(newIndentString);
                     element.print(pw, newIndentString);
                     pw.println(",");
                 }
+                JsonValue lastElement = elements.getLast();
+                pw.print(newIndentString);
+                lastElement.print(pw, newIndentString);
+                pw.println();
             }
-            JsonValue lastElement = elements.get(elements.size() - 1);
-            pw.print(newIndentString);
-            lastElement.print(pw, newIndentString);
-            pw.println();
 
             pw.print(indentString);
             pw.print("]");
