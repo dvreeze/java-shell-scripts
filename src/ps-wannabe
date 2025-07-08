@@ -70,7 +70,9 @@ public final class PsWannabe implements Runnable {
         JsonSupport.JsonObject processHandleJson = new JsonSupport.JsonObject(
                 Map.of(
                         "pid", new JsonSupport.JsonNumber(new BigDecimal(processHandle.pid())),
-                        "ppid", new JsonSupport.JsonNumber(new BigDecimal(processHandle.parent().orElseThrow().pid())),
+                        "ppid", processHandle.parent()
+                                .map(v -> (JsonSupport.JsonValue) new JsonSupport.JsonNumber(new BigDecimal(v.pid())))
+                                .orElse(JsonSupport.JsonNull.INSTANCE),
                         "info", new JsonSupport.JsonObject(
                                 Map.of(
                                         "user", processHandle.info().user()
