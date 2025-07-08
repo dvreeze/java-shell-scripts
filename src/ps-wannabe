@@ -17,9 +17,9 @@
  */
 
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * Java program and shell script providing information about a given process.
@@ -65,7 +65,257 @@ public final class PsWannabe implements Runnable {
             return;
         }
 
-        // TODO Extensive JSON output
-        stdOutWriter.println(processHandleOption.get());
+        ProcessHandle processHandle = processHandleOption.orElseThrow();
+
+        JsonSupport.JsonObject processHandleJson = new JsonSupport.JsonObject(
+                Map.of(
+                        "pid", new JsonSupport.JsonNumber(new BigDecimal(processHandle.pid())),
+                        "ppid", new JsonSupport.JsonNumber(new BigDecimal(processHandle.parent().orElseThrow().pid())),
+                        "info", new JsonSupport.JsonString(processHandle.info().toString()), // TODO Turn into JSON
+                        "isAlive", new JsonSupport.JsonBoolean(processHandle.isAlive()),
+                        "children", new JsonSupport.JsonArray(
+                                processHandle.children()
+                                        .map(proc -> (JsonSupport.JsonValue) new JsonSupport.JsonNumber(new BigDecimal(proc.pid())))
+                                        .toList()
+                        ),
+                        "descendants", new JsonSupport.JsonArray(
+                                processHandle.descendants()
+                                        .map(proc -> (JsonSupport.JsonValue) new JsonSupport.JsonNumber(new BigDecimal(proc.pid())))
+                                        .toList()
+                        )
+                )
+        );
+
+        stdOutWriter.println(processHandleJson);
+    }
+
+    // JSON support (copied from other source file)
+
+    /**
+     * JSON support, to be copied (as static member class) into Java shell scripts that need it.
+     *
+     * @author Chris de Vreeze
+     */
+    public static class JsonSupport {
+
+        private JsonSupport() {
+        }
+
+        // Very heavily inspired by JSON-B
+
+        public enum JsonValueType {
+            OBJECT, ARRAY, NUMBER, BOOLEAN, STRING, NULL
+        }
+
+        // Intended to be immutable data structures
+
+        public interface JsonValue {
+
+            JsonSupport.JsonValueType getValueType();
+
+            // TODO Consider taking control over malformed/unmappable character mapping (using CharsetEncoder)
+
+            void print(PrintWriter pw, String indentString);
+        }
+
+        public interface JsonStructure extends JsonSupport.JsonValue {
+        }
+
+        public record JsonObject(
+                Map<String, JsonSupport.JsonValue> fields) implements JsonSupport.JsonStructure {
+
+            public JsonObject {
+                fields = Map.copyOf(fields);
+            }
+
+            @Override
+            public JsonSupport.JsonValueType getValueType() {
+                return JsonSupport.JsonValueType.OBJECT;
+            }
+
+            @Override
+            public void print(PrintWriter pw, String indentString) {
+                pw.println("{");
+
+                String newIndentString = indentString + "    ";
+
+                List<Map.Entry<String, JsonSupport.JsonValue>> entries = List.copyOf(fields.entrySet());
+
+                if (!entries.isEmpty()) {
+                    for (Map.Entry<String, JsonSupport.JsonValue> entry : entries.subList(0, entries.size() - 1)) {
+                        pw.print(newIndentString);
+                        pw.printf("\"%s\": ", entry.getKey());
+                        entry.getValue().print(pw, newIndentString);
+                        pw.println(",");
+                    }
+                }
+                Map.Entry<String, JsonSupport.JsonValue> lastEntry = entries.get(entries.size() - 1);
+                pw.print(newIndentString);
+                pw.printf("\"%s\": ", lastEntry.getKey());
+                lastEntry.getValue().print(pw, newIndentString);
+                pw.println();
+
+                pw.print(indentString);
+                pw.print("}");
+            }
+
+            @Override
+            public String toString() {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+
+                print(pw, "");
+                return sw.toString();
+            }
+
+            public static JsonSupport.JsonObject from(Map<String, JsonSupport.JsonValue> fields) {
+                return new JsonSupport.JsonObject(Map.copyOf(fields));
+            }
+        }
+
+        public record JsonArray(
+                List<JsonSupport.JsonValue> elements) implements JsonSupport.JsonStructure {
+
+            public JsonArray {
+                elements = List.copyOf(elements);
+            }
+
+            @Override
+            public JsonSupport.JsonValueType getValueType() {
+                return JsonSupport.JsonValueType.ARRAY;
+            }
+
+            @Override
+            public void print(PrintWriter pw, String indentString) {
+                pw.println("[");
+
+                String newIndentString = indentString + "    ";
+
+                if (!elements.isEmpty()) {
+                    for (JsonSupport.JsonValue element : elements.subList(0, elements.size() - 1)) {
+                        pw.print(newIndentString);
+                        element.print(pw, newIndentString);
+                        pw.println(",");
+                    }
+                }
+                JsonSupport.JsonValue lastElement = elements.get(elements.size() - 1);
+                pw.print(newIndentString);
+                lastElement.print(pw, newIndentString);
+                pw.println();
+
+                pw.print(indentString);
+                pw.print("]");
+            }
+
+            @Override
+            public String toString() {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+
+                print(pw, "");
+                return sw.toString();
+            }
+
+            public static JsonSupport.JsonArray from(List<JsonSupport.JsonValue> elements) {
+                return new JsonSupport.JsonArray(List.copyOf(elements));
+            }
+        }
+
+        public interface JsonAtomicValue extends JsonSupport.JsonValue {
+        }
+
+        public record JsonNumber(BigDecimal value) implements JsonSupport.JsonAtomicValue {
+
+            public JsonNumber {
+                Objects.requireNonNull(value);
+            }
+
+            @Override
+            public JsonSupport.JsonValueType getValueType() {
+                return JsonSupport.JsonValueType.NUMBER;
+            }
+
+            @Override
+            public void print(PrintWriter pw, String indentString) {
+                pw.print(this);
+            }
+
+            @Override
+            public String toString() {
+                return String.format("%s", value().toString());
+            }
+
+            public static JsonSupport.JsonNumber from(int number) {
+                return new JsonSupport.JsonNumber(new BigDecimal(number));
+            }
+        }
+
+        public record JsonBoolean(boolean value) implements JsonSupport.JsonAtomicValue {
+
+            @Override
+            public JsonSupport.JsonValueType getValueType() {
+                return JsonSupport.JsonValueType.BOOLEAN;
+            }
+
+            @Override
+            public void print(PrintWriter pw, String indentString) {
+                pw.print(this);
+            }
+
+            @Override
+            public String toString() {
+                return String.valueOf(value());
+            }
+        }
+
+        public record JsonString(String value) implements JsonSupport.JsonAtomicValue {
+
+            public JsonString {
+                Objects.requireNonNull(value);
+            }
+
+            @Override
+            public JsonSupport.JsonValueType getValueType() {
+                return JsonSupport.JsonValueType.STRING;
+            }
+
+            @Override
+            public void print(PrintWriter pw, String indentString) {
+                pw.print(this);
+            }
+
+            @Override
+            public String toString() {
+                return String.format("""
+                                "%s"\s""".stripTrailing(),
+                        escapeDoubleQuotes(value())
+                );
+            }
+        }
+
+        public enum JsonNull implements JsonSupport.JsonValue {
+            INSTANCE;
+
+            @Override
+            public JsonSupport.JsonValueType getValueType() {
+                return JsonSupport.JsonValueType.NULL;
+            }
+
+            @Override
+            public void print(PrintWriter pw, String indentString) {
+                pw.print(this);
+            }
+
+            @Override
+            public String toString() {
+                return "null";
+            }
+        }
+
+        // See https://docs.ycrash.io/ycrash-features/ycrash-faq/escaping-special-characters.html
+
+        private static String escapeDoubleQuotes(String s) {
+            return s.replace("\"", "\\\"");
+        }
     }
 }
