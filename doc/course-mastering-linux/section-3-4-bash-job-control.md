@@ -61,6 +61,7 @@ we can use command `stty tostop`:
 * so, after `stty tostop`, when we start a background job, it will only run until it creates any output
 * i.e., once it writes any output, it will be suspended immediately
 * then we can disable this feature with `stty -tostop`
+* after that, we can resume the job (with `fg` or `bg`), and the output is displayed
 
 Suppose we have 3 big downloads, each of them running as a background job. We can wait for them
 and execute another command once all of them have finished, using the `wait` command:
