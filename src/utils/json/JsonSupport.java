@@ -73,9 +73,7 @@ public class JsonSupport {
 
             List<Map.Entry<String, JsonValue>> entries = List.copyOf(fields.entrySet());
 
-            if (entries.isEmpty()) {
-                pw.println();
-            } else {
+            if (!entries.isEmpty()) {
                 for (Map.Entry<String, JsonValue> entry : entries.subList(0, entries.size() - 1)) {
                     pw.print(newIndentString);
                     pw.printf("\"%s\": ", entry.getKey());
@@ -124,9 +122,7 @@ public class JsonSupport {
 
             String newIndentString = indentString + "    ";
 
-            if (elements.isEmpty()) {
-                pw.println();
-            } else {
+            if (!elements.isEmpty()) {
                 for (JsonValue element : elements.subList(0, elements.size() - 1)) {
                     pw.print(newIndentString);
                     element.print(pw, newIndentString);
