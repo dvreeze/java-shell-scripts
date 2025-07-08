@@ -71,7 +71,32 @@ public final class PsWannabe implements Runnable {
                 Map.of(
                         "pid", new JsonSupport.JsonNumber(new BigDecimal(processHandle.pid())),
                         "ppid", new JsonSupport.JsonNumber(new BigDecimal(processHandle.parent().orElseThrow().pid())),
-                        "info", new JsonSupport.JsonString(processHandle.info().toString()), // TODO Turn into JSON
+                        "info", new JsonSupport.JsonObject(
+                                Map.of(
+                                        "user", processHandle.info().user()
+                                                .map(v -> (JsonSupport.JsonValue) new JsonSupport.JsonString(v))
+                                                .orElse(JsonSupport.JsonNull.INSTANCE),
+                                        "command", processHandle.info().command()
+                                                .map(v -> (JsonSupport.JsonValue) new JsonSupport.JsonString(v))
+                                                .orElse(JsonSupport.JsonNull.INSTANCE),
+                                        "commandLine", processHandle.info().commandLine()
+                                                .map(v -> (JsonSupport.JsonValue) new JsonSupport.JsonString(v))
+                                                .orElse(JsonSupport.JsonNull.INSTANCE),
+                                        "arguments", processHandle.info().arguments()
+                                                .map(v -> (JsonSupport.JsonValue) new JsonSupport.JsonArray(
+                                                        Arrays.stream(v)
+                                                                .map(arg -> (JsonSupport.JsonValue) new JsonSupport.JsonString(arg))
+                                                                .toList())
+                                                )
+                                                .orElse(JsonSupport.JsonNull.INSTANCE),
+                                        "startInstant", processHandle.info().startInstant()
+                                                .map(v -> (JsonSupport.JsonValue) new JsonSupport.JsonString(v.toString()))
+                                                .orElse(JsonSupport.JsonNull.INSTANCE),
+                                        "totalCpuDuration", processHandle.info().totalCpuDuration()
+                                                .map(v -> (JsonSupport.JsonValue) new JsonSupport.JsonString(v.toString()))
+                                                .orElse(JsonSupport.JsonNull.INSTANCE)
+                                )
+                        ),
                         "isAlive", new JsonSupport.JsonBoolean(processHandle.isAlive()),
                         "children", new JsonSupport.JsonArray(
                                 processHandle.children()
