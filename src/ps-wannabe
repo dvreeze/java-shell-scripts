@@ -100,6 +100,7 @@ public final class PsWannabe implements Runnable {
                                 )
                         ),
                         "isAlive", new JsonSupport.JsonBoolean(processHandle.isAlive()),
+                        "supportsNormalTermination", new JsonSupport.JsonBoolean(processHandle.supportsNormalTermination()),
                         "children", new JsonSupport.JsonArray(
                                 processHandle.children()
                                         .map(proc -> (JsonSupport.JsonValue) new JsonSupport.JsonNumber(new BigDecimal(proc.pid())))
