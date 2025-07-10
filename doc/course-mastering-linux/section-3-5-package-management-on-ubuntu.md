@@ -31,7 +31,7 @@ needed for the program and for its installation on the system. Installation woul
 dpkg -i package.deb
 ```
 
-Nice to know (but we can always do `dpkg --help, of course) is that the "architecture" can be found as
+Nice to know (but we can always do `dpkg --help`, of course) is that the "architecture" can be found as
 follows, in case of confusion about which architecture to select for packages to install:
 
 ```bash
