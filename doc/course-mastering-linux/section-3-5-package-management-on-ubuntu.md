@@ -20,7 +20,7 @@ This section is about package management for Ubuntu.
 
 It is based on Debian package management. It uses `apt` or `apt-get` (choose whichever one you like best),
 and at a lower level it uses `dpkg`. As an alternative to `apt`/`apt-get` we can use `snap`, but it does
-matter for which software we choose to use `snap` instead of `apt`/`apt-get`.
+make a difference for which software we choose to use `snap` instead of `apt`/`apt-get`.
 
 At a low level, `dpkg` is used to install software, distributed as `*.deb` files. It does not manage
 dependencies. A `*.deb` file is a compressed archive, in the "ar" file format, with all the files
@@ -46,7 +46,8 @@ not really matter which one of those 2 tools is used, in scripts it is better to
 of its API stability.
 
 Program `apt`/`apt-get` knows about packages (and their versions) that are available, and about where to locate
-them, through a list of *repositories*. These repositories are found by `apt`/`apt-get` in:
+them, by its knowledge of the list of *repositories* that it must use. These repositories are found by
+`apt`/`apt-get` in:
 * file `/etc/apt/sources.list` for repositories from the system
 * files `/etc/apt/sources.list.d/*` for additional (3rd party) repositories
 
@@ -58,13 +59,13 @@ Before installing software with `apt`/`apt-get`, we need to update the "package 
 fetch the latest list of available packages from the repositories:
 * `sudo apt update` or `sudo apt-get update`
 
-Only after that we should install needed software, and their dependencies:
+Only after that we should install needed software, and their dependencies. For example:
 * `sudo apt install postgresql` or `sudo apt-get install postgresql`
 
 `apt`/`apt-get` will remember which packages have been installed manually and which ones have been
 installed as dependencies.
 
-Keeping the system up-to-date, by installing available updates:
+Keeping the system up-to-date, by installing available updates, can be done as follows:
 1. `sudo apt update` or `sudo apt-get update`
 2. `sudo apt upgrade` or `sudo apt-get upgrade --with-new-pkgs`
 
@@ -127,7 +128,7 @@ Best practices:
   * do not upgrade immediately after the release of a new Ubuntu release, but wait a few months
   * create a complete backup of the system
 * use LTS (Long Term Support) Ubuntu versions (for servers)
-* consider using Docker etc. to containerize some/many of the used software
+* consider using Docker etc. to containerize some/many of the used applications
 
 Sometimes when installing packages the installation process asks us questions, or it runs
 some configuration. For example:
