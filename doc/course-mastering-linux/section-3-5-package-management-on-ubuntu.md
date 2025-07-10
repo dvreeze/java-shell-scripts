@@ -28,7 +28,7 @@ needed for the program and for its installation on the system. Installation woul
 
 ```bash
 # Do not do this. Use apt or apt-get instead, to manage dependencies as well.
-dpkg -i package.deb
+sudo dpkg -i package.deb
 ```
 
 Nice to know (but we can always do `dpkg --help`, of course) is that the "architecture" can be found as
