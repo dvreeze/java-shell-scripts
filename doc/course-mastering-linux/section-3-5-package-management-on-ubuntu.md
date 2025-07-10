@@ -19,7 +19,7 @@ Package management differs quite a lot in the details between different Linux di
 This section is about package management for Ubuntu.
 
 It is based on Debian package management. It uses `apt` or `apt-get` (choose whichever one you like best),
-and at a lower level it uses `dpkg`. As an alternative to `apt/`apt-get` we can use `snap`, but it does
+and at a lower level it uses `dpkg`. As an alternative to `apt`/`apt-get` we can use `snap`, but it does
 matter for which software we choose to use `snap` instead of `apt`/`apt-get`.
 
 At a low level, `dpkg` is used to install software, distributed as `*.deb` files. It does not manage
