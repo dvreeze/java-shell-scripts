@@ -59,7 +59,7 @@ The *user mode* layer contains the following sub-layers:
 2. *System components*, such as `systemd`, X11, Wayland etc.
 3. *C standard library*: calls to functions like `fopen`, `execv`, `malloc`, `localtime` etc.
 
-Below the user mode layer, we have the *kernel layer*. The latter contains the following sub-layers:
+Below the user mode layer, we have the *kernel mode* layer. The latter contains the following sub-layers:
 1. *System calls* provided by the kernel, such as `read`, `open`, `write`, `close` etc.
 2. *Linux kernel* to manage the hardware
 3. *Physical hardware*, so CPU, memory, storage, network etc.
