@@ -9,4 +9,7 @@ Following the structure of this part of the course, this documentation contains 
 3. [Section 3.3. Processes and Signals](./section-3-3-processes-and-signals.md)
 4. [Section 3.4. Bash: Job Control](./section-3-4-bash-job-control.md)
 5. [Section 3.5. Package management on Ubuntu](./section-3-5-package-management-on-ubuntu.md)
-6. ...
+6. [Section 3.6. Package management on CentOS](./section-3-6-package-management-on-centos.md)
+7. [Section 3.7. The system boot process and systemd](./section-3-7-the-system-boot-process-and-systemd.md)
+8. [Section 3.8. Volumes, partitions and mounts](./section-3-8-volumes-partitions-and-mounts.md)
+9. ...
