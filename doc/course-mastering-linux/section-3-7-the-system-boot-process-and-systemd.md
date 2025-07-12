@@ -42,7 +42,7 @@ The *kernel* is the core of the operating system. Its main functions are:
   * implements several network protocols, e.g. TCP/IP, Ethernet
   * routing, packet filtering and traffic control
 * *hardware abstraction layer* (HAL)
-  * enables applications to communicate with various devices (under `/dev`)
+  * enables applications to communicate with various devices (the abstract devices are under `/dev`)
 
 *Kernel modules* are pieces of code that can be loaded into the kernel on demand.
 They allow us to extend the functionality of the kernel. A few examples are:
@@ -50,15 +50,19 @@ They allow us to extend the functionality of the kernel. A few examples are:
 * *VFIO* (virtual function I/O), allowing a guest OS to access the host GPU
 * other kernel modules, such as VirtualBox Guest Addons, ZFS filesystem etc.
 
-How do we *communicate with hardware*? For that, consider the following layers and sub-layers:
+How do we *communicate with hardware*? There are *2 main layers* involved in that:
 1. *User mode*
-    1.1. User applications, such as bash, firefox etc.
-    1.2. *System components*, such as `systemd`, X11, Wayland etc.
-    1.3. *C standard library*: calls to functions like `fopen`, `execv`, `malloc`, `localtime` etc.
 2. *Kernel mode*
-    2.1. *System calls* provided by the kernel, such as `read`, `open`, `write`, `close` etc.
-    2.2. *Linux kernel* to manage the hardware
-    2.3. *Physical hardware*, so CPU, memory, storage, network etc.
+
+The *user mode* layer contains the following sub-layers:
+1. User applications, such as bash, firefox etc.
+2. *System components*, such as `systemd`, X11, Wayland etc.
+3. *C standard library*: calls to functions like `fopen`, `execv`, `malloc`, `localtime` etc.
+
+Below the user mode layer, we have the *kernel layer*. The latter contains the following sub-layers:
+1. *System calls* provided by the kernel, such as `read`, `open`, `write`, `close` etc.
+2. *Linux kernel* to manage the hardware
+3. *Physical hardware*, so CPU, memory, storage, network etc.
 
 #### 3.7.3. Step 3. `systemd`
 
