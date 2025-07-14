@@ -317,3 +317,58 @@ can be done as follows:
 * easy editing: `sudo systemctl edit apache2.service`
   * internally, this creates directory `/etc/systemd/system/apache2.service.d`
   * from that directory, override files will be loaded, changing certain parts of the initial configuration
+
+*Example: logging current time and pinging a server on booting*. File `my-network-log.service` could be
+created with the following contents:
+
+```
+[Unit]
+Description=Ping a server and log it
+Requires=network.target
+
+[Service]
+Type=oneshot
+StandardOutput=append:/network-log/log.txt
+ExecStart=date '+%%T'
+ExecStart=ping -c 4 google.com
+
+[Install]
+WantedBy=multi-user.target
+```
+
+*Next example: `systemd` timer units*. First disable the previous service:
+`sudo systemctl disable my-network-log.service`. Now create a timer unit with
+configuration file `/etc/systemd/system/my-network-log.timer`, having the following contents:
+
+```
+[Unit]
+Description=Run the network logging service on boot
+
+[Timer]
+OnActiveSec=5min
+Unit=my-network-log.service
+
+[Install]
+WantedBy=timers.target
+```
+
+With command `systemd-analyze` we can see the date format (`systemd-analyze timestamp now`) or
+analyze placeholders in the calendar format (`systemd-analyze calendar '*-*-* *:0,15,30,45'`).
+
+`systemd-journald` is part of the `systemd` stack, managing system logs. It replaces the traditional
+`syslog`. Key features:
+* binary format for efficient storage
+* centralized logging solution
+* automatic log rotation and retention
+* indexing and querying capabilities
+* logs messages during boot as well
+
+Basic usage examples of command `journalctl` (and `systemd-cat`):
+* `journalctl` shows all logs
+* `journalctl -b` only shows the current boot
+* `journalctl --list-boots` shows all available boots
+* `journalctl -u unit-name` filters by systemd unit
+* `journalctl --since "2025-05-20" --until "2025-05-23"` shows an example of filtering by time range
+* `journalctl -r` reverses the output
+* `journalctl -f` follows the log in real time, analogous to `tail -f`
+* sending a message into the `journalctl` log: `echo 'message' | systemd-cat`
