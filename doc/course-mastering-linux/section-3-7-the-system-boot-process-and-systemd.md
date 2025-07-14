@@ -137,7 +137,7 @@ F S UID          PID    PPID  C PRI  NI ADDR SZ WCHAN  STIME TTY        TIME CMD
 4 S chris       3248       1  0  80   0 -  5381 -      00:12 ?          0:02 /usr/lib/systemd/systemd --user
 ```
 
-##### `systemd` units, and service units in particular
+##### 3.7.3.1. `systemd` units, and service units in particular
 
 `systemd` uses so-called *units* as basic building blocks. Units can declare *dependencies on other
 units*. Some quite important types of unit are:
@@ -173,7 +173,7 @@ A *unit* can be managed with the `systemctl` command:
 * reloading the unit's configuration (not to be confused with the `systemd` configuration of the unit):
   * e.g. `systemctl reload apache2.service`
 
-##### cgroups
+##### 3.7.3.2. cgroups
 
 *Control groups*, or *cgroups* in short, allow for control over distribution of system resources to
 groups of processes. That is:
@@ -224,7 +224,7 @@ can be run as follows:
 systemd-run --user --slice=browser.slice /usr/bin/firefox
 ```
 
-##### `systemd` target units
+##### 3.7.3.3. `systemd` target units
 
 So far, we have seen *service units* and *slice units* in `systemd`. There are also so-called
 *target units* (among many other types of units), which group units logically to a goal. They are
@@ -246,7 +246,7 @@ sudo systemctl list-units --type target --all
 sudo systemctl set-default multi-user.target
 ```
 
-##### enabling and disabling a `systemd` unit
+##### 3.7.3.4. enabling and disabling a `systemd` unit
 
 *Enabling* a `systemd` *unit*:
 * e.g. `sudo systemctl enable apache2.service`
@@ -258,7 +258,7 @@ sudo systemctl set-default multi-user.target
 * e.g. `sudo systemctl stop apache2.service` followed by `sudo systemctl disable apache2.service`
   * the unit will then no longer be loaded on boot
 
-##### configuring `systemd` units
+##### 3.7.3.5. configuring `systemd` units
 
 The *format* of *unit configuration files* in general, and of *service unit configuration files* in
 particular, is described in manual pages such as `man systemd.unit` and `man systemd.service`,
@@ -365,7 +365,7 @@ WantedBy=timers.target
 With command `systemd-analyze` we can see the date format (`systemd-analyze timestamp now`) or
 analyze placeholders in the calendar format (`systemd-analyze calendar '*-*-* *:0,15,30,45'`).
 
-##### `systemd-journald`
+##### 3.7.3.6. `systemd-journald`
 
 `systemd-journald` is part of the `systemd` stack, managing system logs. It replaces the traditional
 `syslog`. Key features:
