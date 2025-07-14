@@ -170,3 +170,150 @@ A *unit* can be managed with the `systemctl` command:
   * e.g. `systemctl start apache2.service`, `systemctl stop apache2.service`, `systemctl restart apache2.service`
 * reloading the unit's configuration (not to be confused with the `systemd` configuration of the unit):
   * e.g. `systemctl reload apache2.service`
+
+*Control groups*, or *cgroups* in short, allow for control over distribution of system resources to
+groups of processes. That is:
+* *cgroups* organizes processes hierarchically
+  * non-leaf nodes in this hierarchy/tree are other cgroups
+  * leaf nodes in this hierarchy/tree are individual OS processes
+  * if we start a sub-process, it will automatically be in the same cgroup as the parent processes
+* using cgroups, we can more evenly distribute system resources
+* cgroups are a *Linux kernel feature*
+* `systemd` relies heavily on cgroups to manage processes
+* use cases of cgroups (within the same server):
+  * resource limiting; e.g. setting memory limits on a cgroup, or limiting the percentage of CPU resources
+  * measuring resource consumption per cgroup
+  * freezing a group of processes
+* also see [namespaces and cgroups](https://blog.nginx.org/blog/what-are-namespaces-cgroups-how-do-they-work)
+* or see [resource management on Redhat Linux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/6/html/resource_management_guide/index)
+
+We can inspect *cgroups* as follows:
+* show all processes on the system with `systemctl status`
+* inspecting cgroups with `systemd-cgtop`
+  * by default, this displays at most 3 levels of cgroups
+  * but that level can be changed, e.g. with `--depth=5`
+
+As an aside, *Docker containers* (and alternatives) also rely heavily on *cgroups*, as well as on
+*namespaces*:
+* *namespaces* are also a *Linux kernel feature*
+* we can even emulate containers by directly working with namespaces (and cgroups)
+* we could even simulate some of a container's isolation:
+  * e.g. `sudo unshare --user --pid --map-root-user --mount-proc --fork bash` (exit with `exit`)
+  * note how this changes the pid namespace, for example; `ps -f` and `ps -ef` return quite different output, reusing PIDs like 1 etc.
+* also see [namespaces and cgroups](https://blog.nginx.org/blog/what-are-namespaces-cgroups-how-do-they-work)
+* or see [containers behind the scenes](https://blog.kubesimplify.com/understanding-how-containers-work-behind-the-scenes)
+
+*Cgroup example: limiting Firefox to a mere 100 MB of RAM*. For this, we create a *systemd slice* in our
+user account. See `man systemd.slice`. The slice (let's call it "browser") is created as file
+`~/.config/systemd/user/browser.slice`, with the following content:
+
+```
+[Slice]
+MemoryHigh=100MB
+```
+
+After that, assuming `/usr/bin/firefox` is the path to the real Firefox executable (check with `file`
+command) and not the path to a Firefox script (which can change the cgroup configuration), then Firefox
+can be run as follows:
+
+```bash
+systemd-run --user --slice=browser.slice /usr/bin/firefox
+```
+
+So far, we have seen *service units* and *slice units* in `systemd`. There are also so-called
+*target units* (among many other types of units), which group units logically to a goal. They are
+managed by ".target" unit files.
+
+Examples of *target unit* querying/manipulation:
+
+```bash
+# Getting the current default target
+sudo systemctl get-default
+
+# Switching target without rebooting. PLEASE DO NOT DO THIS!
+sudo systemctl isolate multi-user.target
+
+# Listing available targets
+sudo systemctl list-units --type target --all
+
+# Changing the current default target. PLEASE DO NOT DO THIS!
+sudo systemctl set-default multi-user.target
+```
+
+*Enabling* a `systemd` *unit*:
+* e.g. `sudo systemctl enable apache2.service`
+  * this will enable the unit on boot, if so specified in the unit configuration file
+* e.g. `sudo systemctl enable --now apache2.service`
+  * like above, but also loading the unit immediately
+
+*Disabling* a `systemd` *unit*:
+* e.g. `sudo systemctl stop apache2.service` followed by `sudo systemctl disable apache2.service`
+  * the unit will then no longer be loaded on boot
+
+The *format* of *unit configuration files* in general, and of *service unit configuration files* in
+particular, is described in manual pages such as `man systemd.unit` and `man systemd.service`,
+respectively.
+
+The sections in a *service unit configuration file* are as follows:
+
+```
+[Unit]
+
+[Service]
+
+[Install]
+
+```
+
+The `Unit` section contains *configuration options* such as:
+* `Description`
+  * brief explanation, to help users understand the purpose of the (service) unit
+* `Documentation`
+  * links to relevant documentation
+* `Requires`
+  * ensures that other units are activated before this unit
+  * if a required unit fails to start, this unit will not be started
+* `Wants`
+  * like `Requires`, but this unit will start even if a wanted unit fails to start
+  * this is useful for optional dependencies
+* `After`
+  * ensures this unit will start after the specified units, if they occur
+  * this helps define a unit activation order
+* `Before`
+  * ensure this unit will start before the specified units, if they occur
+  * like for `After`, this helps define a unit activation order
+
+The `Service` section of a service unit configuration file contains *configuration options* such as:
+* `Type`
+  * defines the process type and startup behavior; e.g. `simple`, `exec`, `forking`, `oneshot`
+* `ExecStart`
+  * the command to start the service
+  * it can include arguments and options
+  * but it is NOT a full Bash command! so, do not rely on command rewriting!
+* `ExecStop`
+  * optional command to stop the service
+* `Restart`
+  * defines when the service should be automatically restarted
+  * e.g. `no`, `on-success`, `on-failure`, `on-abnormal`, `on-abort`, `always`
+* `User`
+  * user under which the command should run
+* `Environment`
+  * defines environment variables for the service
+
+The `Install` section contains *configuration options* such as:
+* `WantedBy`
+  * specified the target(s) that should include this unit as dependency
+  * common targets include `multi-user.target` and `graphical.target`
+  * enables the unit to be started automatically at boot when `systemctl enable` is used
+
+*Editing* a unit configuration file can be done *manually* or using `systemctl edit`. Manual editing
+can be done as follows:
+1. copy the unit file from `/lib/systemd/system` to `/etc/systemd/system` (the latter takes precedence)
+2. edit the file
+3. inform `systemd`, using command `sudo systemctl daemon-reload`
+
+*Editing* a unit configuration file with `systemctl edit`:
+* printing the current configuration: e.g. `sudo systemctl cat apache2.service`
+* easy editing: `sudo systemctl edit apache2.service`
+  * internally, this creates directory `/etc/systemd/system/apache2.service.d`
+  * from that directory, override files will be loaded, changing certain parts of the initial configuration
