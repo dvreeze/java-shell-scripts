@@ -78,11 +78,11 @@ public final class AccessLogToJsonConverter implements Runnable {
     ) {
 
         public JsonSupport.JsonObject toJsonValue() {
-            return new JsonSupport.JsonObject(
-                    Map.of(
-                            "httpMethod", new JsonSupport.JsonString(httpMethod().toString()),
-                            "requestUrl", new JsonSupport.JsonString(url()),
-                            "httpVersion", new JsonSupport.JsonString(httpVersion())
+            return JsonSupport.JsonObject.from(
+                    List.of(
+                            Map.entry("httpMethod", new JsonSupport.JsonString(httpMethod().toString())),
+                            Map.entry("requestUrl", new JsonSupport.JsonString(url())),
+                            Map.entry("httpVersion", new JsonSupport.JsonString(httpVersion()))
                     )
             );
         }
@@ -101,21 +101,21 @@ public final class AccessLogToJsonConverter implements Runnable {
     ) {
 
         public JsonSupport.JsonObject toJsonValue() {
-            return new JsonSupport.JsonObject(
-                    Map.of(
-                            "clientIpAddress", new JsonSupport.JsonString(ipAddress()),
-                            "clientIdentity", new JsonSupport.JsonString(clientIdentity()),
-                            "userId", new JsonSupport.JsonString(userId()),
-                            "dateTime", new JsonSupport.JsonString(requestDateTime()),
-                            "request", request().toJsonValue(),
-                            "httpStatus", JsonSupport.JsonNumber.from(httpStatusCode()),
-                            "size", Optional.ofNullable(sizeOfResponse())
+            return JsonSupport.JsonObject.from(
+                    List.of(
+                            Map.entry("clientIpAddress", new JsonSupport.JsonString(ipAddress())),
+                            Map.entry("clientIdentity", new JsonSupport.JsonString(clientIdentity())),
+                            Map.entry("userId", new JsonSupport.JsonString(userId())),
+                            Map.entry("dateTime", new JsonSupport.JsonString(requestDateTime())),
+                            Map.entry("request", request().toJsonValue()),
+                            Map.entry("httpStatus", JsonSupport.JsonNumber.from(httpStatusCode())),
+                            Map.entry("size", Optional.ofNullable(sizeOfResponse())
                                     .map(Object::toString)
                                     .map(JsonSupport.JsonString::new)
                                     .map(v -> (JsonSupport.JsonValue) v)
-                                    .orElse(JsonSupport.JsonNull.INSTANCE),
-                            "referrer", new JsonSupport.JsonString(referrer()),
-                            "userAgent", new JsonSupport.JsonString(userAgent())
+                                    .orElse(JsonSupport.JsonNull.INSTANCE)),
+                            Map.entry("referrer", new JsonSupport.JsonString(referrer())),
+                            Map.entry("userAgent", new JsonSupport.JsonString(userAgent()))
                     )
             );
         }
@@ -282,7 +282,7 @@ public final class AccessLogToJsonConverter implements Runnable {
                 Map<String, JsonSupport.JsonValue> fields) implements JsonSupport.JsonStructure {
 
             public JsonObject {
-                fields = Map.copyOf(fields);
+                fields = new LinkedHashMap<>(fields);
             }
 
             @Override
@@ -325,8 +325,12 @@ public final class AccessLogToJsonConverter implements Runnable {
                 return sw.toString();
             }
 
-            public static JsonSupport.JsonObject from(Map<String, JsonSupport.JsonValue> fields) {
-                return new JsonSupport.JsonObject(Map.copyOf(fields));
+            public static JsonObject from(List<Map.Entry<String, JsonValue>> fields) {
+                Map<String, JsonValue> fieldMap = new LinkedHashMap<>();
+                for (Map.Entry<String, JsonValue> entry : fields) {
+                    fieldMap.put(entry.getKey(), entry.getValue());
+                }
+                return new JsonObject(fieldMap);
             }
         }
 

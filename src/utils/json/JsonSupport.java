@@ -19,6 +19,7 @@ package utils.json;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -57,7 +58,7 @@ public class JsonSupport {
     public record JsonObject(Map<String, JsonValue> fields) implements JsonStructure {
 
         public JsonObject {
-            fields = Map.copyOf(fields);
+            fields = new LinkedHashMap<>(fields);
         }
 
         @Override
@@ -100,8 +101,12 @@ public class JsonSupport {
             return sw.toString();
         }
 
-        public static JsonObject from(Map<String, JsonValue> fields) {
-            return new JsonObject(Map.copyOf(fields));
+        public static JsonObject from(List<Map.Entry<String, JsonValue>> fields) {
+            Map<String, JsonValue> fieldMap = new LinkedHashMap<>();
+            for (Map.Entry<String, JsonValue> entry : fields) {
+                fieldMap.put(entry.getKey(), entry.getValue());
+            }
+            return new JsonObject(fieldMap);
         }
     }
 
@@ -254,54 +259,54 @@ public class JsonSupport {
         JsonValue jsonObject = JsonArray.from(
                 List.of(
                         JsonObject.from(
-                                Map.of(
-                                        "clientIpAddress", new JsonString("83.149.9.216"),
-                                        "clientIdentity", new JsonString("-"),
-                                        "userId", new JsonString("-"),
-                                        "dateTime", new JsonString("[17/May/2015:10:05:47 +0000]"),
-                                        "request", JsonObject.from(
-                                                Map.of(
-                                                        "httpMethod", new JsonString("GET"),
-                                                        "requestUrl", new JsonString("/presentations/logstash-monitorama-2013/plugin/highlight/highlight.js"),
-                                                        "httpVersion", new JsonString("HTTP/1.1")
+                                List.of(
+                                        Map.entry("clientIpAddress", new JsonString("83.149.9.216")),
+                                        Map.entry("clientIdentity", new JsonString("-")),
+                                        Map.entry("userId", new JsonString("-")),
+                                        Map.entry("dateTime", new JsonString("[17/May/2015:10:05:47 +0000]")),
+                                        Map.entry("request", JsonObject.from(
+                                                List.of(
+                                                        Map.entry("httpMethod", new JsonString("GET")),
+                                                        Map.entry("requestUrl", new JsonString("/presentations/logstash-monitorama-2013/plugin/highlight/highlight.js")),
+                                                        Map.entry("httpVersion", new JsonString("HTTP/1.1"))
                                                 )
-                                        ),
-                                        "httpStatus", JsonNumber.from(200),
-                                        "size", new JsonString("26185")
+                                        )),
+                                        Map.entry("httpStatus", JsonNumber.from(200)),
+                                        Map.entry("size", new JsonString("26185"))
                                 )
                         ),
                         JsonObject.from(
-                                Map.of(
-                                        "clientIpAddress", new JsonString("83.149.9.216"),
-                                        "clientIdentity", new JsonString("-"),
-                                        "userId", new JsonString("-"),
-                                        "dateTime", new JsonString("[17/May/2015:10:05:12 +0000]"),
-                                        "request", JsonObject.from(
-                                                Map.of(
-                                                        "httpMethod", new JsonString("GET"),
-                                                        "requestUrl", new JsonString("/presentations/logstash-monitorama-2013/plugin/zoom-js/zoom.js"),
-                                                        "httpVersion", new JsonString("HTTP/1.1")
+                                List.of(
+                                        Map.entry("clientIpAddress", new JsonString("83.149.9.216")),
+                                        Map.entry("clientIdentity", new JsonString("-")),
+                                        Map.entry("userId", new JsonString("-")),
+                                        Map.entry("dateTime", new JsonString("[17/May/2015:10:05:12 +0000]")),
+                                        Map.entry("request", JsonObject.from(
+                                                List.of(
+                                                        Map.entry("httpMethod", new JsonString("GET")),
+                                                        Map.entry("requestUrl", new JsonString("/presentations/logstash-monitorama-2013/plugin/zoom-js/zoom.js")),
+                                                        Map.entry("httpVersion", new JsonString("HTTP/1.1"))
                                                 )
-                                        ),
-                                        "httpStatus", JsonNumber.from(200),
-                                        "size", new JsonString("7697")
+                                        )),
+                                        Map.entry("httpStatus", JsonNumber.from(200)),
+                                        Map.entry("size", new JsonString("7697"))
                                 )
                         ),
                         JsonObject.from(
-                                Map.of(
-                                        "clientIpAddress", new JsonString("83.149.9.216"),
-                                        "clientIdentity", new JsonString("-"),
-                                        "userId", new JsonString("-"),
-                                        "dateTime", new JsonString("[17/May/2015:10:05:07 +0000]"),
-                                        "request", JsonObject.from(
-                                                Map.of(
-                                                        "httpMethod", new JsonString("GET"),
-                                                        "requestUrl", new JsonString("/presentations/logstash-monitorama-2013/plugin/notes/notes.js"),
-                                                        "httpVersion", new JsonString("HTTP/1.1")
+                                List.of(
+                                        Map.entry("clientIpAddress", new JsonString("83.149.9.216")),
+                                        Map.entry("clientIdentity", new JsonString("-")),
+                                        Map.entry("userId", new JsonString("-")),
+                                        Map.entry("dateTime", new JsonString("[17/May/2015:10:05:07 +0000]")),
+                                        Map.entry("request", JsonObject.from(
+                                                List.of(
+                                                        Map.entry("httpMethod", new JsonString("GET")),
+                                                        Map.entry("requestUrl", new JsonString("/presentations/logstash-monitorama-2013/plugin/notes/notes.js")),
+                                                        Map.entry("httpVersion", new JsonString("HTTP/1.1"))
                                                 )
-                                        ),
-                                        "httpStatus", JsonNumber.from(200),
-                                        "size", new JsonString("2892")
+                                        )),
+                                        Map.entry("httpStatus", JsonNumber.from(200)),
+                                        Map.entry("size", new JsonString("2892"))
                                 )
                         )
                 )

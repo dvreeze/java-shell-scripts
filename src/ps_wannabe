@@ -67,50 +67,50 @@ public final class PsWannabe implements Runnable {
 
         ProcessHandle processHandle = processHandleOption.orElseThrow();
 
-        JsonSupport.JsonObject processHandleJson = new JsonSupport.JsonObject(
-                Map.of(
-                        "pid", new JsonSupport.JsonNumber(new BigDecimal(processHandle.pid())),
-                        "ppid", processHandle.parent()
+        JsonSupport.JsonObject processHandleJson = JsonSupport.JsonObject.from(
+                List.of(
+                        Map.entry("pid", new JsonSupport.JsonNumber(new BigDecimal(processHandle.pid()))),
+                        Map.entry("ppid", processHandle.parent()
                                 .map(v -> (JsonSupport.JsonValue) new JsonSupport.JsonNumber(new BigDecimal(v.pid())))
-                                .orElse(JsonSupport.JsonNull.INSTANCE),
-                        "info", new JsonSupport.JsonObject(
-                                Map.of(
-                                        "user", processHandle.info().user()
+                                .orElse(JsonSupport.JsonNull.INSTANCE)),
+                        Map.entry("info", JsonSupport.JsonObject.from(
+                                List.of(
+                                        Map.entry("user", processHandle.info().user()
                                                 .map(v -> (JsonSupport.JsonValue) new JsonSupport.JsonString(v))
-                                                .orElse(JsonSupport.JsonNull.INSTANCE),
-                                        "command", processHandle.info().command()
+                                                .orElse(JsonSupport.JsonNull.INSTANCE)),
+                                        Map.entry("command", processHandle.info().command()
                                                 .map(v -> (JsonSupport.JsonValue) new JsonSupport.JsonString(v))
-                                                .orElse(JsonSupport.JsonNull.INSTANCE),
-                                        "commandLine", processHandle.info().commandLine()
+                                                .orElse(JsonSupport.JsonNull.INSTANCE)),
+                                        Map.entry("commandLine", processHandle.info().commandLine()
                                                 .map(v -> (JsonSupport.JsonValue) new JsonSupport.JsonString(v))
-                                                .orElse(JsonSupport.JsonNull.INSTANCE),
-                                        "arguments", processHandle.info().arguments()
+                                                .orElse(JsonSupport.JsonNull.INSTANCE)),
+                                        Map.entry("arguments", processHandle.info().arguments()
                                                 .map(v -> (JsonSupport.JsonValue) new JsonSupport.JsonArray(
                                                         Arrays.stream(v)
                                                                 .map(arg -> (JsonSupport.JsonValue) new JsonSupport.JsonString(arg))
                                                                 .toList())
                                                 )
-                                                .orElse(JsonSupport.JsonNull.INSTANCE),
-                                        "startInstant", processHandle.info().startInstant()
+                                                .orElse(JsonSupport.JsonNull.INSTANCE)),
+                                        Map.entry("startInstant", processHandle.info().startInstant()
                                                 .map(v -> (JsonSupport.JsonValue) new JsonSupport.JsonString(v.toString()))
-                                                .orElse(JsonSupport.JsonNull.INSTANCE),
-                                        "totalCpuDuration", processHandle.info().totalCpuDuration()
+                                                .orElse(JsonSupport.JsonNull.INSTANCE)),
+                                        Map.entry("totalCpuDuration", processHandle.info().totalCpuDuration()
                                                 .map(v -> (JsonSupport.JsonValue) new JsonSupport.JsonString(v.toString()))
-                                                .orElse(JsonSupport.JsonNull.INSTANCE)
+                                                .orElse(JsonSupport.JsonNull.INSTANCE))
                                 )
-                        ),
-                        "isAlive", new JsonSupport.JsonBoolean(processHandle.isAlive()),
-                        "supportsNormalTermination", new JsonSupport.JsonBoolean(processHandle.supportsNormalTermination()),
-                        "children", new JsonSupport.JsonArray(
+                        )),
+                        Map.entry("isAlive", new JsonSupport.JsonBoolean(processHandle.isAlive())),
+                        Map.entry("supportsNormalTermination", new JsonSupport.JsonBoolean(processHandle.supportsNormalTermination())),
+                        Map.entry("children", new JsonSupport.JsonArray(
                                 processHandle.children()
                                         .map(proc -> (JsonSupport.JsonValue) new JsonSupport.JsonNumber(new BigDecimal(proc.pid())))
                                         .toList()
-                        ),
-                        "descendants", new JsonSupport.JsonArray(
+                        )),
+                        Map.entry("descendants", new JsonSupport.JsonArray(
                                 processHandle.descendants()
                                         .map(proc -> (JsonSupport.JsonValue) new JsonSupport.JsonNumber(new BigDecimal(proc.pid())))
                                         .toList()
-                        )
+                        ))
                 )
         );
 
@@ -153,7 +153,7 @@ public final class PsWannabe implements Runnable {
                 Map<String, JsonSupport.JsonValue> fields) implements JsonSupport.JsonStructure {
 
             public JsonObject {
-                fields = Map.copyOf(fields);
+                fields = new LinkedHashMap<>(fields);
             }
 
             @Override
@@ -196,8 +196,12 @@ public final class PsWannabe implements Runnable {
                 return sw.toString();
             }
 
-            public static JsonSupport.JsonObject from(Map<String, JsonSupport.JsonValue> fields) {
-                return new JsonSupport.JsonObject(Map.copyOf(fields));
+            public static JsonSupport.JsonObject from(List<Map.Entry<String, JsonSupport.JsonValue>> fields) {
+                Map<String, JsonSupport.JsonValue> fieldMap = new LinkedHashMap<>();
+                for (Map.Entry<String, JsonSupport.JsonValue> entry : fields) {
+                    fieldMap.put(entry.getKey(), entry.getValue());
+                }
+                return new JsonSupport.JsonObject(fieldMap);
             }
         }
 
