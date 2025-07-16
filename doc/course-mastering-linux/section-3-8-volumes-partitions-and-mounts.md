@@ -221,7 +221,7 @@ Enabling the filesystem check:
 Before resizing partitions, first check the current partitions, with `gparted` or `parted` (command
 `print` in the `parted` shell). Also, if needed, first back up the data before proceeding!
 
-Reducing a partition, say `/dev/sdb2` (of filesystem type "ext4"):
+Reducing the size of a partition, say `/dev/sdb2` (of filesystem type "ext4"):
 1. `sudo umount /dev/sdb2`
 2. `sudo fsck.ext4 /dev/sdb2`
 3. `sudo resize2fs /dev/sdb2 10G` (not the same for all filesystems; potentially not even supported!)
