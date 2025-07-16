@@ -17,6 +17,8 @@ For the *structure* of the storage device, see the *partition table*:
   * supports larger disks
 
 With command `gparted` we can visualize this. We can get the same information from CLI tool `parted`.
+In particular, when in a `parted` "shell", the `print` "command" shows the partitions. But be very
+careful when using these commands `gparted` and `parted`!
 
 Important when organizing partitions: mind the difference between *KiB* (kibibyte) and *kB* (kilobyte),
 etc. `1 KiB` is 1024 or `2 ** 10` bytes, whereas `1 KB` is 1000 or `10 ** 3` bytes. Analogous remarks
@@ -125,7 +127,7 @@ ls /mnt/windows-data/
 sudo umount /mnt/windows-data/
 # Alternatively, we could have unmounted with "sudo umount /dev/nvme0n1p3"
 
-# Check the mount is indeed no longer there
+# Check the mount is indeed no longer there (the target directory is still there, though)
 mount
 ```
 
@@ -174,10 +176,60 @@ Explanation of some of these options:
 * `async` means: reads and writes should be "async" (good for performance, bad for data integrity on a power loss)
 
 After editing `/etc/fstab`, refresh our mounts with command `sudo mount -a`. This mounts all filesystems
-mentioned in `/etc/fstab`.
+mentioned in the "fstab" file.
 
 #### 3.8.4. Mounting an FTP server
 
-#### 3.8.5. Checking for errors
+TODO
 
-#### 3.8.6. Repartitioning
+#### 3.8.5. Checking for errors: SMART and `fsck`
+
+At the level of physical drives, we can check for errors by using SMART.
+At the level of filesystems (on top of physical drives), we can check for errors with command
+`fsck` ("filesystem check"). These checks are particularly important after a sudden loss of power.
+
+First make sure the drive/filesystem to check is *currently not used* in any way!
+
+Using the SMART utility ourselves:
+* command `smartctl`; e.g. `sudo smartctl --all /dev/sda`
+  * install by installing `smartmontools`
+
+Using the `fsck` command:
+* first make sure the filesystem is unmounted and not encrypted!
+* example use: `fsck /dev/sdb2` or `fsck.ext4 /dev/sdb2` for an "ext4" filesystem
+
+Yet how do we check the `/` filesystem? After all, it is always in use. Still, we can do one of the
+following things:
+* once getting into the GRUB menu on booting, select some "filesystem checks" option
+* or edit file `/etc/default/grub`, setting a kernel parameter: `fsck.mode=force`
+* otherwise: boot from another device, such as a USB drive, and check the filesystem from there
+
+By default, Ubuntu does not automatically check the filesystem on boot, unless the *dirty bit* is
+set, which is the case when the volume has not been unmounted properly. We can schedule such checks
+ourselves, though.
+
+Checking whether the filesystem check is enabled:
+* e.g. (time-based) `sudo tune2fs -l /dev/sbd2 | grep -i -F 'check'`
+* e.g. (mount-based) `sudo tune2fs -l /dev/sbd2 | grep -i -F 'mount'`
+
+Enabling the filesystem check:
+* e.g. (every 30 mounts): `sudo tune2fs -c 30 /dev/sdb2`
+* e.g. (every 6 months): `sudo tune2fs -i 6m /dev/sdb2`
+
+#### 3.8.6. Resizing partitions
+
+Before resizing partitions, first check the current partitions, with `gparted` or `parted` (command
+`print` in the `parted` shell). Also, if needed, first back up the data before proceeding!
+
+Reducing a partition, say `/dev/sdb2` (of filesystem type "ext4"):
+1. `sudo umount /dev/sdb2`
+2. `sudo fsck.ext4 /dev/sdb2`
+3. `sudo resize2fs /dev/sdb2 10G` (not the same for all filesystems; potentially not even supported!)
+4. `sudo parted /dev/sdb2`, using sub-command `resizpart` in the `parted` shell
+
+So we first *decreased* the size of the filesystem, and after that did the same for the physical partition.
+
+*Increasing* the size of a partition should be done the other way around, so first the physical partition
+and then the filesystem.
+
+Many filesystems support online resizing, in which case we do not have to first unmount the filesystem.

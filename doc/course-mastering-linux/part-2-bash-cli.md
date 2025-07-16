@@ -143,6 +143,7 @@ Examples of using the above-mentioned commands with pipes:
     * getting the number of occurrences as well: `sort names.txt | uniq -c`
 * `grep`, without using regular expressions:
     * `cat file.txt | grep -F 'hello'` (we could have just written: `grep -F 'hello' file.txt`)
+    * `cat file.txt | grep -i -F 'hello'` (case-insensitive matching, in pattern and data)
     * please use `grep` only for text files (for more reliable results, for performance and for avoiding non-printable chars)
     * note that non-printable characters can change the behavior of the terminal
 * `tr` (translate):
