@@ -173,6 +173,20 @@ A *unit* can be managed with the `systemctl` command:
 * reloading the unit's configuration (not to be confused with the `systemd` configuration of the unit):
   * e.g. `systemctl reload apache2.service`
 
+Earlier a distinction was made between `systemd` in *system mode* versus *user mode*. Failing to keep this
+distinction in mind can easily lead to confusion. Take for example the installation process of
+`docker-desktop`. We might want to run `docker` as root user, or as the logged-in user, assuming this
+user has been added to the "docker" group. In the latter case, we manage "docker-desktop" in *user mode*.
+
+That is, `systemctl` must connect to the *user service manager* (`--user`), not to the *system manager*
+(`--system`, which is the default). So:
+* querying for the status of the service: `systemctl --user status docker-desktop.service`
+  * without the `--user` parameter, the service would not even be found!
+  * after all, it is there according to the user service manager, but not according to the system manager
+* stopping the service: `systemctl --user stop docker-desktop.service`
+* starting the service: `systemctl --user start docker-desktop.service`
+* with plain command `systemctl status` we can confirm that "docker-desktop" is a service in *user mode*
+
 ##### 3.7.3.2. cgroups
 
 *Control groups*, or *cgroups* in short, allow for control over distribution of system resources to
@@ -384,3 +398,7 @@ Basic usage examples of command `journalctl` (and `systemd-cat`):
 * `journalctl -r` reverses the output
 * `journalctl -f` follows the log in real time, analogous to `tail -f`
 * sending a message into the `journalctl` log: `echo 'message' | systemd-cat`
+
+Analogous to `systemctl`, `journalctl` can show the *system journal* (parameter `--system`, which is
+the default) or the *user journal* of the current user (parameter `--user`). Again, this is consistent
+with the fact that `systemd` can be used in *system mode* or in *user mode*.
