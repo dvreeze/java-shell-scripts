@@ -69,6 +69,15 @@ If we just want to get a PID, based on process name, `ps -ef --forest | grep -F 
 Instead, we could just do `pgrep firefox`. To get child processes as well, do `pgrep -f firefox`.
 Then we could do things like: `renice -n 19 $(pgrep -f firefox)` (without double-quote pairs).
 
+Another way of finding processes is via command `fuser` (see `fuser --help`). It is not mentioned in this
+course (at least not in this section), I believe. Based on a given file, socket or filesystem, this
+command can find processes using that file/socket/filesystem. This command can even send a signal
+to the processes found (see below for a treaty of signals).
+
+For example, a cumbersome way of finding IntelliJ processes is by using the `fuser` command, passing
+the path to the IntelliJ `bin` directory as argument. Still, the `fuser` command can be quite useful
+when troubleshooting.
+
 #### 3.3.1. Signals
 
 *Signals*  can be sent to processes, *interrupting* the process flow at a *convenient* time
