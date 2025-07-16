@@ -225,7 +225,7 @@ Reducing the size of a partition, say `/dev/sdb2` (of filesystem type "ext4"):
 1. `sudo umount /dev/sdb2`
 2. `sudo fsck.ext4 /dev/sdb2`
 3. `sudo resize2fs /dev/sdb2 10G` (not the same for all filesystems; potentially not even supported!)
-4. `sudo parted /dev/sdb2`, using sub-command `resizpart` in the `parted` shell
+4. `sudo parted /dev/sdb2`, using sub-command `resizepart` in the `parted` shell
 
 So we first *decreased* the size of the filesystem, and after that did the same for the physical partition.
 
