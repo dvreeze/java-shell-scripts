@@ -59,7 +59,10 @@ public final class ShowInterfacesAsJson implements Runnable {
         PrintWriter stdErrWriter = new PrintWriter(System.err, true);
 
         try {
-            List<NetworkInterface> networkInterfaces = NetworkInterface.networkInterfaces().toList();
+            List<NetworkInterface> networkInterfaces = NetworkInterface.networkInterfaces()
+                    .sorted(Comparator.comparingInt(NetworkInterface::getIndex))
+                    .toList();
+
             stdOutWriter.println(
                     JsonSupport.JsonArray.from(
                             networkInterfaces
