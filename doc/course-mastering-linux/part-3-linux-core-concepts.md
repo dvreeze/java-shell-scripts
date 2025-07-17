@@ -14,4 +14,6 @@ Following the structure of this part of the course, this documentation contains 
 8. [Section 3.8. Volumes, partitions and mounts](./section-3-8-volumes-partitions-and-mounts.md)
 9. [Section 3.9. LVM (Logical Volume Manager)](./section-3-9-lvm.md)
 10. [Section 3.10. Full Software Upgrade](./section-3-10-full-software-upgrade.md)
-11. ...
+11. [Section 3.11. Cron Jobs](./section-3-11-cron-jobs.md)
+12. [Section 3.12. Networking](./section-3-12-networking.md)
+13. ...
