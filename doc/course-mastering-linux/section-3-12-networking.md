@@ -123,7 +123,130 @@ used in this regard are:
 
 #### 3.12.4. Network layer
 
-TODO
+The *network layer* builds on the foundation of the data link layer underneath it. Let's first start with
+some theory. The data sent over the wire in this network layer are *IP packets*, i.e. *internet protocol
+packets*.
+
+*IP packets* in the ubiquitous IPv4 standard (see [IPv4](https://en.wikipedia.org/wiki/IPv4)) use *addresses*
+for source and destination that consist of 4 bytes, i.e. 32 bits. These IPv4 addresses are typically not
+written in binary, octal or hexadecimal notation, but in decimal notation. For example, `192.168.1.2` is
+an IPv4 address.
+
+Which part of an IPv4 address identifies a network, and which part identifies a device in that network?
+For that we use *subnet masks*, consisting of multiple "1-bits" followed by 0 or more "0-bits". For example:
+* the subnet mask for an address such as `192.168.1.2` is typically `255.255.255.0` (also in decimal notation)
+* we get the network by the "logical AND" of the IPv4 address and the subnet mask
+* above, the IP address in binary form is: `11000000.10101000.00000001.00000010`
+* and the subnet mask is: `11111111.11111111.11111111.00000000`
+* so the "network" (as the "logical AND" of IP address and subnet mask) is: `11000000.10101000.00000001.00000000`
+* given this IP address and subnet mask, clearly address `192.168.1.212` belongs to the same network
+* yet address `172.16.4.12` clearly does not belong to the same network
+
+We can represent a subnet mask by the number of (leading) binary "ones", e.g. 24 in the example above.
+The IPv4 address with subnet mask then becomes the following so-called *CIDR address*:
+`192.168.1.2/24`, which is IP address `192.168.1.2` in a network with subnet mask `255.255.255.0`.
+
+Some IPv4 address ranges are "private", so they are not globally unique and cannot be used for publicly
+known IP addresses on the internet. They can be used for private networks, though. Well-known such
+reserved address ranges include:
+* `10.0.0.0/8`
+* `172.16.0.0/12`
+* `192.168.0.0/16`
+
+Let's now describe the *network layer*:
+* the network layer supports communication with devices in *other networks*, and not just within one local area network (using Ethernet/Wi-Fi)
+* the data in this layer is sent in *IP packets* (typically IPv4 packets)
+* the nodes in network layer communication have an *IP address* (see above for IPv4 addresses)
+  * it would be nice if these addresses were globally unique, but the situation is more complicated (see below)
+* the network layer builds on top of the foundation of the data link layer (for communication within a LAN)
+  * specifically, the payload of data link layer Ethernet/Wi-Fi frames is typically IP packets
+  * so IP packets are typically wrapped in Ethernet/Wi-Fi frames within a local area network
+* each *IP packet* has:
+  * a *source IP address*
+  * a *destination IP address* (typically outside the current local area network)
+  * a *payload*, which is typically a *UDP or TCP segment* belonging to the layer above the network layer
+
+Note that with IPv4 addresses consisting of only 4 bytes, the number of supported IPv4 addresses on the
+internet is quite low (less than 2 to the power of 32, so less than 4 GiB unique addresses).
+A solution is the use of IPv6, which offers a far larger address space, but IPv6 is still not as widely
+supported as IPv4.
+
+A typical workaround for the low number of IPv4 addresses is to use publicly available IPv4 addresses
+on the internet, and reserved addresses such as the ones in address range `192.168.0.0/16` inside the
+LAN. Let's consider typical network layer communication in a home network, and starting from a device
+in that home network. The router or gateway in the LAN has both an `192.168.0.0/16` address as well as
+in IPv4 address "publicly known on the internet".
+
+There are 2 scenarios to be acquainted with in this context:
+* the destination is in the same LAN
+  * the data link layer makes sure the device with the destination MAC address can be found
+  * at the network layer, source and destination also belong to the same network
+  * i.e., source and destination typically have IPv4 addresses in the same reserved address range, such as `192.168.1.0/24`
+  * in this case, the frame (containing the IP packet) stays within the LAN, and the router/gateway knows that the IP packet must not leave the LAN
+* the destination is outside the LAN, and somewhere else on the internet
+  * the data link layer makes sure the frame containing the IP packet reaches the router/gateway
+  * the router/gateway knows that the IP packet in the frame must leave the LAN, and find its way to other routers until the destination is reached
+  * the router/gateway must perform *NAT* (*network address translation*), by rewriting request and response IP packet IP addresses
+  * after all, the reserved IP addresses used inside the LAN are not known on the internet
+  * so, to make this work, the router/gateway must keep track of IP packet rewritings in order to do the reverse rewriting on response IP packets
+
+But how does the router/gateway know about how to route IP packets? It has this knowledge from a so-called
+*routing table* (see below).
+
+To show our machine's network interfaces with corresponding IP addresses, see command `ip addr show` again.
+So this command not only shows the network interfaces at the data link layer (with their MAC addresses),
+but also the assigned IP addresses (and subnet masks).
+
+To show the *routing table*, use command `ip route show`. The output contains lines that convey the
+following information: network X (say, `192.168.1.0/24`) can be reached via network interface Y
+(say, `wlp0s20f3`) from own device IP address Z (say, `192.168.1.104`). There is also a line for
+the "default" network, so any network not mentioned in the other lines (typically for internet access).
+
+Adding/removing an IP address to a network interface:
+* adding: e.g. `sudo ip addr add 192.168.1.10/24 dev enp0s5` (where `enp0s5` is a network interface)
+* removing: e.g. `sudo ip addr del 192.168.1.10/24 dev enp0s5`
+
+Managing the *routing table*:
+* querying for one address: e.g. `ip route get 8.8.8.8` (consults the routing table, but does not guarantee the destination can be reached)
+* adding a route: e.g. `sudo ip route add 10.0.0.0/24 via 192.168.1.1 dev enp0s5` (where `192.168.1.1` is the gateway)
+* deleting a route: e.g. `sudo ip route del 10.0.0.0/24 via 192.168.1.1 dev enp0s5`
+
+How does a client get an IP address? Especially in home networks, this is typically achieved through
+*DHCP* (*Dynamic Host Configuration Protocol*). DHCP is a protocol on top of transport layer protocol
+UDP, but conceptually it "belongs" to the network layer, because it helps manage the network layer.
+
+DHCP consists of:
+* the DHCP server
+  * it stores an IP address pool, manages IP address leases, and assigns/reclaims addresses
+  * in a home network, the router is typically the DHCP server (for private IP addresses in the LAN)
+* the DHCP client
+  * it requests an IP address and configuration
+  * it renews or releases IP address leases
+* possibly also a DHCP relay agent (forwarding requests between subnets)
+
+The DHCP protocol works as follows:
+1. *Discover*: the client broadcasts a DHCP discover message, which is handled by the DHCP server (and ignored by other nodes)
+2. *Offer*: the DHCP server responds, offering an IP address and lease information
+3. *Request*: the client sends a request message, accepting the IP address and lease terms
+4. *Acknowledge*: the server acknowledges the IP address lease to the client
+
+DHCP can be inspected. First check with `systemctl status` whether `systemd-networkd` or `NetworkManager`
+is used. Then DHCP-related issues can be inspected either with `journalctl -u systemd-networkd` or
+`journalctl -u NetworkManager`, depending on the stack used.
+
+The well-known `ping` tool can be used to check reachability of nodes in the network layer.
+E.g. `ping -c 5 8.8.8.8`. It uses the *ICMP* protocol (*Internet Control Message Protocol*).
+ICMP can be considered a network layer protocol.
+See [ICMP](https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol).
+
+Command `traceroute` can be used to find out the path taken by IP packets to the destination.
+It shows where latency occurs and exposes potential routing issues. Under the hood, `traceroute`
+starts out by sending an IP packet with TTL 1. Our router will decrement the TTL by 1. It therefore
+becomes 0, so our router will discard the package, and reply with ICMP "Time Exceeded" message. So we
+have the address of the router (the first hop). Next an IP package with TTL 2 is sent. This will reach
+the next router after our router, which will reply with the ICMP "Time Exceeded" message, so which will
+reveal the IP address of that next router after our router. And so on, until the destination is found,
+if it is reached by `traceroute`.
 
 #### 3.12.5. Transport layer
 
