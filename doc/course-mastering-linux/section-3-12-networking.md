@@ -22,7 +22,7 @@ The 7 layers of the OSI model, from bottom layer to top layer are:
 2. *data link layer*; this layer provides error-free transfer of so-called *frames* between *adjacent* network nodes (each node having a *MAC address*)
 3. *network layer*; this layer manages routing and forwarding of so-called *packets* between networks; *IP* belongs to this layer
 4. *transport layer*; this layer ensures reliable transfer of so-called *segments* between host/application pairs; *UDP* and *TCP* belong to this layer
-5. *session layer*; this layer manages *sessions* between applications
+5. *session layer*; this layer manages *sessions* in network communication between applications
 6. *presentation layer*; this layer translates, encrypts and compresses data for transmission between applications and the network; *TLS/SSL* belongs to this layer
 7. *application layer*; this layer offers high-level *network protocols* for applications communicating over a network; e.g. `http`, `tfp`, `smtp`
 
