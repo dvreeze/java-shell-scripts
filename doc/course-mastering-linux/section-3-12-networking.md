@@ -143,8 +143,9 @@ For that we use *subnet masks*, consisting of multiple "1-bits" followed by 0 or
 * yet address `172.16.4.12` clearly does not belong to the same network
 
 We can represent a subnet mask by the number of (leading) binary "ones", e.g. 24 in the example above.
-The IPv4 address with subnet mask then becomes the following so-called *CIDR address*:
+The IPv4 address with subnet mask then becomes the following address:
 `192.168.1.2/24`, which is IP address `192.168.1.2` in a network with subnet mask `255.255.255.0`.
+Note that this network is `192.168.1.0/24`, in so-called *CIDR notation*.
 
 Some IPv4 address ranges are "private", so they are not globally unique and cannot be used for publicly
 known IP addresses on the internet. They can be used for private networks, though. Well-known such
