@@ -193,7 +193,7 @@ There are 2 scenarios to be acquainted with in this context:
   * source and destination typically have IPv4 addresses in the same reserved address range, such as `192.168.1.0/24`
 * the destination is outside the LAN, and somewhere else on the internet
 
-If the destination is in the same LAN:
+If the *destination is in the same LAN*:
 1. consulting the *routing table* (see below), the destination IP address is found in the same LAN
 2. this destination IP address maps to a MAC address (in the same LAN, of course) by consulting the ARP cache
 3. a data link frame containing the IP packet is created and sent to the destination MAC address
@@ -202,7 +202,7 @@ If the destination is in the same LAN:
 In a request/response scenario (this mainly depends on the application layer in the OSI model), the same
 happens for the response, but switching source and destination address.
 
-If the destination is outside the LAN, and somewhere else on the internet:
+If the *destination is outside the LAN*, and somewhere else on the internet:
 1. consulting the *routing table* (see below), the router/gateway IP address is found for the "first hop"
 2. this router/gateway IP address maps to a MAC address (in the same LAN, of course) by consulting the ARP cache
 3. a data link frame containing the IP packet is created and sent to the router's MAC address
