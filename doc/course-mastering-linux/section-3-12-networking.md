@@ -121,6 +121,9 @@ used in this regard are:
 * `avahi-browse -a -r` (discussed later)
 * etc.
 
+The *OUI* (i.e. first 3 bytes) of a MAC address can also help make sense of what device has which MAC
+address in a LAN. To that end, many OUIs can be looked up in [OUI lookup](https://www.wireshark.org/tools/oui-lookup.html).
+
 Note that *ARP* is *technically* a data link layer protocol that *assists* the network layer.
 Technically it is a data link layer protocol, because ARP data is the payload of data link layer frames,
 and, unlike IP packets, these frame payloads do not leave the LAN (and are not "routable"). Yet ARP does
