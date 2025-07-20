@@ -190,16 +190,31 @@ an IPv4 address "publicly known on the internet".
 
 There are 2 scenarios to be acquainted with in this context:
 * the destination is in the same LAN
-  * the data link layer makes sure the device with the destination MAC address can be found
-  * at the network layer, source and destination also belong to the same network
-  * i.e., source and destination typically have IPv4 addresses in the same reserved address range, such as `192.168.1.0/24`
-  * in this case, the frame (containing the IP packet) stays within the LAN, and the router/gateway knows that the IP packet must not leave the LAN
+  * source and destination typically have IPv4 addresses in the same reserved address range, such as `192.168.1.0/24`
 * the destination is outside the LAN, and somewhere else on the internet
-  * the data link layer makes sure the frame containing the IP packet reaches the router/gateway
-  * the router/gateway knows that the IP packet in the frame must leave the LAN, and find its way to other routers until the destination is reached
-  * the router/gateway must perform *NAT* (*network address translation*), by rewriting request and response IP packet IP addresses
-  * after all, the reserved IP addresses used inside the LAN are not known on the internet
-  * so, to make this work, the router/gateway must keep track of IP packet rewritings in order to do the reverse rewriting on response IP packets
+
+If the destination is in the same LAN:
+1. consulting the *routing table* (see below), the destination IP address is found in the same LAN
+2. this destination IP address maps to a MAC address (in the same LAN, of course) by consulting the ARP cache
+3. a data link frame containing the IP packet is created and sent to the destination MAC address
+4. and the IP packet (payload of the frame) is extracted from the frame
+
+In a request/response scenario (this mainly depends on the application layer in the OSI model), the same
+happens for the response, but switching source and destination address.
+
+If the destination is outside the LAN, and somewhere else on the internet:
+1. consulting the *routing table* (see below), the router/gateway IP address is found for the "first hop"
+2. this router/gateway IP address maps to a MAC address (in the same LAN, of course) by consulting the ARP cache
+3. a data link frame containing the IP packet is created and sent to the router's MAC address
+4. the router extracts the IP packet from the frame, and performs *NAT* (*Network Address Translation*), setting the source IP to its own "internet IP address"
+5. the router forwards this updated IP packet (wrapped in some WAN technology frame) to the next router, and so on, until the destination IP address is reached
+
+In a request/response scenario (this mainly depends on the application layer in the OSI model), the reverse
+happens for the response, switching source and destination address. Note that for the response IP packet,
+the destination address is the "internet IP address" of our router. This router then rewrites the destination
+IP address to the originator of the request (so the router must keep track of NAT-related rewritings),
+and sends the adapted response IP packet, wrapped in a frame, to the originator of this request/response
+interaction.
 
 But how does the router/gateway know about how to route IP packets? It has this knowledge from a so-called
 *routing table* (see below).
