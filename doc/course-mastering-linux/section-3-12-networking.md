@@ -119,6 +119,7 @@ used in this regard are:
   * `nmap` can use other protocols than just ARP alone
   * when using `nmap` in general, like when using `wireshark`, be **extremely careful** not to use this tool without permission outside our local home network!
 * `avahi-browse -a -r` (discussed later)
+* `sudo arp-scan --interface=wlp0s20f3 --localnet` (for network interface `wlp0s20f3`)
 * etc.
 
 The *OUI* (i.e. first 3 bytes) of a MAC address can also help make sense of what device has which MAC
