@@ -293,12 +293,12 @@ has the following characteristics:
   * the UDP or TCP segment is the *payload of an IP packet*, so the UDP/TCP segment is wrapped in an IP packet
   * UDP and TCP segments contain a *source port* and *destination port*, besides other metadata and the payload
   * the *source IP address* and *destination IP address* are of course found in the IP packet that encapsulates the UDP/TCP segment
-* a *TCP segment* offers the above-mentioned functionality (out-of-order handling, retransmissions, flow/congestion control)
+* *TCP* offers the above-mentioned functionality (out-of-order handling, retransmissions, flow/congestion control)
   * so the application does not have to deal with that
   * TCP can therefore be considered a *connection-oriented* protocol
   * and TCP traffic can conceptually be understood in terms of (correctly sorted and complete) input and output byte streams, from the perspective of the application
   * in Java programs, TCP-level communication can be achieved with `java.net.Socket` (client-side) and `java.net.ServerSocket` (server-side)
-* a *UDP segment* does not offer all the above-mentioned functionality
+* *UDP* does not offer all the above-mentioned functionality
   * out-of-order handling and retransmissions are left to the application, and not solved by UDP
   * UDP can be considered a *connection-less* protocol, where each UDP segment is sent independently of other UDP segments
   * UDP clearly has its use cases; e.g. video calls
@@ -322,12 +322,12 @@ The following types of *TCP ports* exist (that server-side applications listen o
 In TCP traffic, the *source port* is randomly assigned from the dynamic/private port range, and the
 *destination port* is typically a well-known or registered port.
 
-Note that TCP ports differentiate between multiple connections on a single device. More precisely, a unique
+Note that *TCP ports* differentiate between multiple connections on a single device. More precisely, a unique
 combination of source IP address, source port, destination IP address and destination port differentiates
 between multiple TCP connections between the same 2 devices, allowing for multiple TCP connections to
 coexist without any conflicts.
 
-The most commonly used UDP ports are:
+The most commonly used *UDP ports* are:
 * DNS (53); this is the Domain Name System
 * DHCP (67 server-side, 68 client-side); this is the Dynamic Host Configuration Protocol
 * SNMP (161, 162); this is the Simple Network Management Protocol
