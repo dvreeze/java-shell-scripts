@@ -279,7 +279,123 @@ if it is reached by `traceroute`.
 
 #### 3.12.5. Transport layer
 
-TODO
+The *transport layer* builds on the foundation of the network layer underneath it. The transport layer
+has the following characteristics:
+* in this layer data is sent between *applications* running on *hosts* across networks
+  * more precisely, data is sent from a *pair of source IP address and source port* to a *pair of destination IP address and destination port*
+  * a sending application (on the source host) should *send* data from the (typically randomly assigned) *source port*
+  * a receiving application (on the destination host) should *listen* for data received on the (typically standardized) *destination port*
+* the transport layer offers the following functionality (partly depending on the kinds of "segments" sent):
+  * multiple connections between remote hosts, and dedicated connections for applications communicating across networks
+  * handling out-of-order packets (if desired), and retransmissions if data is lost (if desired)
+  * flow control (what the receiver can handle) and congestion control (what the connection can handle)
+* the data sent is either a *UDP segment* or a *TCP segment*
+  * the UDP or TCP segment is the *payload of an IP packet*, so the UDP/TCP segment is wrapped in an IP packet
+  * UDP and TCP segments contain a *source port* and *destination port*, besides other metadata and the payload
+  * the *source IP address* and *destination IP address* are of course found in the IP packet that encapsulates the UDP/TCP segment
+* a *TCP segment* offers the above-mentioned functionality (out-of-order handling, retransmissions, flow/congestion control)
+  * so the application does not have to deal with that
+  * TCP can therefore be considered a *connection-oriented* protocol
+  * and TCP traffic can conceptually be understood in terms of (correctly sorted and complete) input and output byte streams, from the perspective of the application
+  * in Java programs, TCP-level communication can be achieved with `java.net.Socket` (client-side) and `java.net.ServerSocket` (server-side)
+* a *UDP segment* does not offer all the above-mentioned functionality
+  * out-of-order handling and retransmissions are left to the application, and not solved by UDP
+  * UDP can be considered a *connection-less* protocol, where each UDP segment is sent independently of other UDP segments
+  * UDP clearly has its use cases; e.g. video calls
+  * in Java programs, UDP-level communication can be achieved with `java.net.DatagramSocket` (client-side and server-side)
+
+UDP and TCP *ports* are 16-bit (or 2-byte) numbers ranging from 0 to 65535. Note that 65535 is one less than 2 to the
+power 16, which makes sense. UDP/TCP ports are written in decimal notation.
+
+The following types of *TCP ports* exist (that server-side applications listen on):
+* *well-known* ports, ranging from 0 to 1023
+  * these TCP ports are reserved for standard services and protocols
+  * e.g. HTTP (80), HTTPS (443), FTP (20, 21), SSH (22), Telnet (23), SMTP (25), IMAP (143), POP3 (110)
+  * FTP uses port 20 for actual data transfer, and port 21 for the control connection
+* *registered* ports, ranging from 1024 to 49151
+  * they are assigned to specific applications by *IANA* (Internet Assigned Numbers Authority)
+  * e.g. MySQL (3306), PostgreSQL (5432), VNC (5900)
+* *dynamic or private* ports, ranging from 49152 to 65535
+  * they are not controlled by IANA, and available for any application to use on an as-needed basis
+  * note that 49152 equals `3 * (2 ** 14)`; so 3 times 2 to the power of 14
+
+In TCP traffic, the *source port* is randomly assigned from the dynamic/private port range, and the
+*destination port* is typically a well-known or registered port.
+
+Note that TCP ports differentiate between multiple connections on a single device. More precisely, a unique
+combination of source IP address, source port, destination IP address and destination port differentiates
+between multiple TCP connections between the same 2 devices, allowing for multiple TCP connections to
+coexist without any conflicts.
+
+The most commonly used UDP ports are:
+* DNS (53); this is the Domain Name System
+* DHCP (67 server-side, 68 client-side); this is the Dynamic Host Configuration Protocol
+* SNMP (161, 162); this is the Simple Network Management Protocol
+* TFTP (69); this the Trivial File Transfer Protocol
+* NTP (123); this is the Network Time Protocol
+* RTP (5004, 5005); this is the Real-time Transport Protocol, used for audio/video streaming
+
+TCP connections start with a *3-way TCP handshake*:
+* goal: both computers need to know that the other side responds
+* and both computers will later need to know how much data has already been received by the other side
+* so, our "sequence numbers" need to be exchanged
+
+The TCP handshake works as follows:
+1. our computer sends a `SYN` packet to the other side
+2. the other side sends a `SYN-ACK` packet back to our computer
+3. our computer replies with an `ACK` packet; the connection has been successfully established
+
+For more details, see for example [TCP 3-way handshaking](https://wiki.wireshark.org/TCP_3_way_handshaking).
+
+We have seen tool `nmap` before, but that was its use for discovering neighbor nodes in the LAN.
+Foremost, `nmap` is a *port scanner* (therefore operating at the transport OSI layer), which is something
+*we are not supposed to do without permission*. Port scanning on our own network should be ok, though.
+
+The idea is that `nmap` tries to connect through all possible ports. If the port is open, the server will
+send back a message. This allows us to identify open ports and available service on the target system.
+
+Example usage of `nmap`:
+* scanning a specific host: e.g. `nmap 192.168.1.254` or `nmap a-host-name`
+  * this will scan the most common 1000 TCP ports
+* scanning specific ports on a specific host:
+  * e.g. `nmap -p 21 192.168.1.254`
+  * e.g. `nmap -p 20,21 192.168.1.254`
+  * e.g. `nmap -p 0-1024 192.168.1.254`
+* scanning all ports on a specific host: e.g. `nmap -p - 192.168.1.254`
+* scanning a range of IP addresses: e.g. `nmap 192.168.1.1-100`
+
+We can use different *kinds of scans*:
+* `-sS` (TCP-SYN-Scan):
+  * the default scan type, if available
+  * it is relatively fast
+  * it sends a `SYN` packet to establish a TCP connection, but does not follow through with the full connection
+  * it might require root privileges
+  * if we receive a `SYN-ACK`, the port is open
+  * if we receive an `RST` (reset) message, the port is closed
+  * if we receive no message, the port is probably blocked or filtered
+* `-sT` (TCP-Connect-Scan):
+  * it is only the default if a TCP-Syn-Scan is not possible (possibly when we are trying to scan an IPv6 network)
+  * in this case `nmap` uses OS functionality to create a connection
+  * it does the full 3-way handshake with the remote server, closing the connection afterward
+  * yet it is slow, may cause crashes on the other side, and might cause logs at the other side
+* `-sU` (UDP-Scan):
+  * this scans for open UDP ports
+  * the idea for UDP scanning: send a UDP packet to the other side
+  * and if we get a reply, the port will be marked as "open"
+  * yet if we get back an error, the port will be marked as "filtered"
+  * and if we don't get any reply, the port will be marked as "open|filtered"
+  * UDP port scanning is extremely slow, and we may have to test ports multiple times as our request may have got lost
+
+We briefly talked about *NAT* (*Network Translation Protocol*) before. Indeed, NAT is mainly a network
+layer feature. Yet NAT can also "rewrite" ports, and not just IP addresses, so in that case NAT becomes
+a transport layer feature.
+
+This port forwarding functionality may be needed if we have a service running within the LAN, listening
+on port 8080, and we want to make this service available to the internet, via port 80. Then we need
+to tell our router to forward port 80 to port 8080 on the node in the LAN running the service.
+It would then also be needed to reserve the IP-to-MAC-address combination for the host running the
+service, thus preventing DHCP in the router from assigning this IP address. If home IP addresses change,
+we may need something like "dyndns" to make this IP+port forwarding work.
 
 #### 3.12.6. Session layer
 
