@@ -113,13 +113,23 @@ How can we find the other devices in a local network (Ethernet and/or Wi-Fi)? So
 used in this regard are:
 * `ip neighbor` (or `ip neighbor show`)
   * it shows the current neighbor table, i.e. *ARP table*
-  * *ARP*, or *Address Resolution Protocol* is the protocol used to map IP addresses to MAC addresses within a LAN
+  * *ARP*, or *Address Resolution Protocol* is the protocol used to map (local) IP addresses to MAC addresses within a LAN
 * `sudo nmap -sn 192.168.1.0/24` (for local network `192.168.1.0/24`)
   * option `-sn` does a ping scan, to discover hosts, and does not do any port scan
   * `nmap` can use other protocols than just ARP alone
   * when using `nmap` in general, like when using `wireshark`, be **extremely careful** not to use this tool without permission outside our local home network!
 * `avahi-browse -a -r` (discussed later)
 * etc.
+
+Note that *ARP* is *technically* a data link layer protocol that *assists* the network layer.
+Technically it is a data link layer protocol, because ARP data is the payload of data link layer frames,
+and, unlike IP packets, these frame payloads do not leave the LAN (and are not "routable"). Yet ARP does
+assist the network layer by mapping (local) IP addresses to MAC addresses (that's why ARP is sometimes called
+a "layer 2.5" protocol).
+
+ARP helps reduce unnecessary traffic within the LAN, because network devices in the LAN cache ARP
+data, thus preventing continuous ARP traffic in the LAN to find out the destination MAC address, given
+an IP address (typically of the router).
 
 #### 3.12.4. Network layer
 
