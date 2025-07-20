@@ -287,7 +287,7 @@ has the following characteristics:
   * a receiving application (on the destination host) should *listen* for data received on the (typically standardized) *destination port*
 * the transport layer offers the following functionality (partly depending on the kinds of "segments" sent):
   * multiple connections between remote hosts, and dedicated connections for applications communicating across networks
-  * handling out-of-order packets (if desired), and retransmissions if data is lost (if desired)
+  * handling out-of-order packets, and retransmissions if data is lost
   * flow control (what the receiver can handle) and congestion control (what the connection can handle)
 * the data sent is either a *UDP segment* or a *TCP segment*
   * the UDP or TCP segment is the *payload of an IP packet*, so the UDP/TCP segment is wrapped in an IP packet
