@@ -391,8 +391,8 @@ layer feature. Yet NAT can also "rewrite" ports, and not just IP addresses, so i
 a transport layer feature.
 
 This port forwarding functionality may be needed if we have a service running within the LAN, listening
-on port 8080, and we want to make this service available to the internet, via port 80. Then we need
-to tell our router to forward port 80 to port 8080 on the node in the LAN running the service.
+on port 8080, and we want to make this service available to the internet, via port 58080. Then we need
+to tell our router to forward port 58080 to port 8080 on the node in the LAN running the service.
 It would then also be needed to reserve the IP-to-MAC-address combination for the host running the
 service, thus preventing DHCP in the router from assigning this IP address. If home IP addresses change,
 we may need something like "dyndns" to make this IP+port forwarding work.
