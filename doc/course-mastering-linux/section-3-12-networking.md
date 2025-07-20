@@ -176,7 +176,7 @@ A typical workaround for the low number of IPv4 addresses is to use publicly ava
 on the internet, and reserved addresses such as the ones in address range `192.168.0.0/16` inside the
 LAN. Let's consider typical network layer communication in a home network, and starting from a device
 in that home network. The router or gateway in the LAN has both an `192.168.0.0/16` address as well as
-in IPv4 address "publicly known on the internet".
+an IPv4 address "publicly known on the internet".
 
 There are 2 scenarios to be acquainted with in this context:
 * the destination is in the same LAN
