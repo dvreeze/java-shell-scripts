@@ -503,11 +503,11 @@ Step 2 in more detail (in typical scenarios):
 10. and the browser now finally sends the request to the IP address corresponding to the domain
 
 DNS distinguishes between different *DNS record types* for DNS records:
-* *A* maps a domain name to an IPv4 address
-* *AAAA* maps a domain name to an IPv6 address
-* *CNAME* provides an alias for another domain name
-* *MX* specifies mail servers for a domain
-* *NS* lists authoritative nameservers for a domain
+* `A` maps a domain name to an IPv4 address
+* `AAAA` maps a domain name to an IPv6 address
+* `CNAME` provides an alias for another domain name
+* `MX` specifies mail servers for a domain
+* `NS` lists authoritative nameservers for a domain
 
 Received DNS entries can be listed with the `host` command. For example:
 * `host google.com` (returns IPv4 address, IPv6 address, and mail server domain name)
