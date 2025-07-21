@@ -412,7 +412,7 @@ change, we may need something like "dyndns" to make this IP+port forwarding work
 
 The *session layer* builds on top of the foundation of the transport layer underneath it. In the session layer
 and the higher layers (presentation layer and application layer) we can think in terms of *streams of
-bytes* or higher-level abstractions on top of that.
+bytes* or "client-server dialogs" (high level protocols) involving byte streams.
 
 The *session layer* has the following characteristics:
 * like the higher layers, the session layer is often completely handled by the application
@@ -420,7 +420,7 @@ The *session layer* has the following characteristics:
 * the session layer establishes, maintains and terminates *connections*, and supports communication between (remote) applications
 * examples of session layer protocols are:
   * *NFS* (*Network File System*), to access remote files on a network (built on an RPC foundation)
-  * *RPC* protocols (*Remote Procedure Calls*), calling *remote functions* as if they are local functions
+  * *RPC* protocols (*Remote Procedure Calls*), calling *remote functions* as if they were local functions
   * *SCP* protocols (*Session Control Protocol*), managing sessions between devices
 * RPC-like protocols are well-known territory for many programmers, e.g. for Java programmers
   * these protocols involve serialization/deserialization of data, data format versioning strategies etc.
@@ -465,7 +465,7 @@ a TCP connection, regardless of the application level protocol.
 Of course, "speaking" HTTP (client-side) is much more practical with commands like `curl` or `wget`.
 
 If a connection uses SSL/TLS, we cannot use `telnet`. In that case we could use command `openssl`,
-which handles the SSL/TLS handshake and encryption for us, provided we have set up certificates.
+which handles the SSL/TLS handshake and encryption for us, provided we have set up the needed certificates.
 For `openssl s_client -connect` command examples, see
 [testing SSL connectivity with openssl](https://docs.pingidentity.com/solution-guides/standards_and_protocols_use_cases/htg_use_openssl_to_test_ssl_connectivity.html).
 For `openssl` command "cryptography" examples, see [openssl examples](https://www.baeldung.com/linux/openssl-command-examples).
