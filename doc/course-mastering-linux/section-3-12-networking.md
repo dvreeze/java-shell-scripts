@@ -213,6 +213,16 @@ If the *destination is outside the LAN*, and somewhere else on the internet:
 4. the router extracts the IP packet from the frame, and performs *NAT* (*Network Address Translation*), setting the source IP to its own "internet IP address"
 5. the router forwards this updated IP packet (wrapped in some WAN technology frame) to the next router, and so on, until the destination IP address is reached
 
+Typically, the hardware device that acts as our router also acts as a modem (so this device is a "modem-router"):
+* the *modem* functionality turns Ethernet/Wi-Fi frames into "WAN technology frames", and vice versa
+  * so the modem functionality is *data link layer* functionality
+* the *router* functionality forwards IP packets, from nodes in our local network to the internet and vice versa
+  * that is, unless the IP packet is meant for another node within our LAN
+  * so the router functionality is *network layer* functionality
+
+In any case, in a home network setup we obviously need both (modem and router) functionalities, whether
+provided as one hardware device or 2 separate ones.
+
 In a request/response scenario (this mainly depends on the application layer in the OSI model), the reverse
 happens for the response, switching source and destination address. Note that for the response IP packet,
 the destination address is the "internet IP address" of our router. This router then rewrites the destination
