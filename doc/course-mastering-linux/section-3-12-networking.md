@@ -184,7 +184,10 @@ Let's now describe the *network layer*:
 Note that with IPv4 addresses consisting of only 4 bytes, the number of supported IPv4 addresses on the
 internet is quite low (less than 2 to the power of 32, so less than 4 GiB unique addresses).
 A solution is the use of IPv6, which offers a far larger address space, but IPv6 is still not as widely
-supported as IPv4.
+supported as IPv4 (well, at least not from the perspective of end users). That said, technically IPv6
+is quite robust, and requires far fewer "workarounds" than IPv4. A separate subsection of this section
+briefly introduces IPv6, although clearly IPv6, like IPv4, belongs to the network layer that is discussed
+here.
 
 A typical workaround for the low number of IPv4 addresses is to use publicly available IPv4 addresses
 on the internet, and reserved addresses such as the ones in address range `192.168.0.0/16` inside the
@@ -449,10 +452,10 @@ Example protocols in the presentation layer are:
 
 At the highest level in the OSI model resides the *application layer*. It contains the *protocols that
 applications can use*. For example:
-* HTTP / HTTPS (for web traffic)
-* IMAP (for accessing e-mails on a remote server)
-* SSH (to access a remote shell, do a "remote copy" through `scp`, etc.)
-* POP3 (for downloading e-mails)
+* *HTTP* / *HTTPS* (for web traffic)
+* *IMAP* (for accessing e-mails on a remote server)
+* *SSH* (to access a remote shell, do a "remote copy" through `scp`, etc.)
+* *POP3* (for downloading e-mails)
 * proprietary protocols, such as custom VOIP implementations
 
 The *HTTP* protocol is very familiar to programmers. A good explanation of HTTP can be found in
@@ -472,4 +475,101 @@ For `openssl` command "cryptography" examples, see [openssl examples](https://ww
 
 #### 3.12.9. Domain Name Service (DNS)
 
-TODO (also an application level protocol)
+The *DNS* (*Domain Name Service*) protocol translates domain names to IP addresses. This facilitates
+human-readable access to websites and services. In particular, the URL we type in the address bar
+of the browser can contain a host name (like `google.com`) instead of an IP address, and the computer
+does the rest, using DNS under the hood.
+
+How does the browser know about the IP address of the domain in the URL? There are 2 steps involved
+(in the context of internet access from a home computer):
+1. finding the IP address of the domain in a cache
+2. if not found, the *DNS resolver* looks up the IP address
+
+Step 1 in more detail:
+1. the *browser* consults its *local cache* that maps domain names to IP addresses
+2. if not found, the *OS* consults its local cache of domain names mapping to IP addresses
+3. if found, we are done; if not, proceed with step 2
+
+Step 2 in more detail (in typical scenarios):
+1. the *DNS resolver* of the *ISP* (Internet Service Provider) checks its *resolver cache*
+2. if not found, the ISP reaches out to one of 13 *root nameservers* (labelled with letters from A to M)
+3. the root nameserver responds with the location (domain and IP address) of a *TLD nameserver* (*Top Level Domain* nameserver)
+4. the TLD nameserver is consulted
+5. the TLD nameserver typically responds with the location (domain and IP address) of the *authoritative nameserver* for the domain
+6. the authoritative nameserver for the domain is consulted
+7. the authoritative nameserver responds with the IP address of the domain
+8. so, now our ISP's DNS resolver has the IP address of the domain, and sends it to our OS
+9. the OS gives this IP address to the browser
+10. and the browser now finally sends the request to the IP address corresponding to the domain
+
+DNS distinguishes between different *DNS record types* for DNS records:
+* *A* maps a domain name to an IPv4 address
+* *AAAA* maps a domain name to an IPv6 address
+* *CNAME* provides an alias for another domain name
+* *MX* specifies mail servers for a domain
+* *NS* lists authoritative nameservers for a domain
+
+Received DNS entries can be listed with the `host` command. For example:
+* `host google.com` (returns IPv4 address, IPv6 address, and mail server domain name)
+* `host -v google.com` (returns the same, but verbosely, listing entire DNS entries)
+* `host -v -t AAAA google.com` (listing entire DNS entries for record type `AAAA`, so for IPv6 addresses)
+* `host -v -t ANY google.com`, or, equivalently: `host -a google.com`
+* `host 10.0.2.15` (reverse lookup, from IP address to domain name; not as reliable as domain-to-IP lookups)
+* `host -t NS google.com` (returns authoritative nameservers for the domain)
+
+To aid our understanding of DNS, we could manually send out DNS queries using the `dig` command.
+Sample (manual) `dig` session:
+1. pick a *root nameserver*: `dig @a.root-servers.net com NS`
+2. query a *TLD nameserver*: `dig @f.gtld-servers.net google.com NS`
+3. query an *authoritative nameserver*: `dig @ns2.google.com google.com ANY`
+
+DNS can not be considered very secure nowadays. For example:
+* *DNS spoofing*: an attacker redirects traffic by altering DNS records
+* *cache poisoning*: inserting malicious DNS entries into a DNS resolver cache
+* *man-in-the-middle-attacks*: DNS queries are intercepted by an attacker, and false responses are returned
+
+To an extent, this can be mitigated by transferring DNS query results via HTTPS, and refusing invalid
+certificates. We could also use *DNSSEC* (DNS Security Extensions), which is not treated in this course.
+
+An IP address (with corresponding domain) can also be manually defined in file `/etc/hosts`.
+
+Sometimes the local DNS server must be refreshed. Yet do we use service `systemd-resolved` or do we
+use `dnsmasq`? With commands like `systemctl status` and `pgrep` we can find the answer to that
+question. Alternatively, we could enter the following command to find the answer:
+
+```bash
+# lsof ("list open files") for port 53, which is the UDP/TCP port for DNS
+sudo lsof -i :53
+```
+
+If we use `systemd-resolved`, the following DNS-related `resolvectl` commands can be used:
+* flushing the caches: `sudo resolvectl flush-caches`
+* querying the "DNS status": `sudo resolvectl status`
+* getting "DNS statistics": `suod resolvectl statistics`
+
+If `dnsmasq` is used, just restart the service:
+* `sudo systemctl restart dnsmasq`
+
+*Within our local network*, the host name can be used to easily access other computers (in the same LAN).
+It is also used during DHCP negotiation. The host name can be found with command `hostname`.
+
+To change the host name, the following steps are needed:
+1. edit file `/etc/hostname`
+2. also edit file `/etc/hosts` to keep it consistent with the host name change in `/etc/hostname`
+3. reboot
+
+Suppose another node within our LAN has host name `ubuntu`. Then we can access it with the
+suffix `.local`. For example:
+* `ping ubuntu.local`
+
+What is this suffix `.local` about? This is called *mDNS* (*Multicast DNS Standard*):
+* it is quite different from normal DNS
+* the idea is to designate a special mDNS domain `.local`, just for local networks
+* then an mDNS query is sent to our entire local network, and the target computer will respond with its IP address
+* but it requires both computers to be configured correctly (details can be found on the internet)
+* on Linux, the `avahi` daemon process must be configured and running
+* on CentOS, `nss-mdns` must be installed, followed by a reboot
+
+#### 3.12.10. IPv6 and the network layer
+
+TODO
