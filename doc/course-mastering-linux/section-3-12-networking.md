@@ -572,4 +572,6 @@ What is this suffix `.local` about? This is called *mDNS* (*Multicast DNS Standa
 
 #### 3.12.10. IPv6 and the network layer
 
-TODO
+An opinionated article about IPv6 can be found
+[here](https://www.sidn.nl/en/modern-internet-standards/ipv6). It has a good technical explanation of
+IPv6 too.
